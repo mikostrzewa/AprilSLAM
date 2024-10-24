@@ -2,3 +2,5 @@
 *.jpg
 failed_images.txt
 .DS_Store
+apriltag/
+.venv/
