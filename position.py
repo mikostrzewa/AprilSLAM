@@ -37,15 +37,6 @@ while True:
         # Extract corner points of the detected AprilTag
         corners = np.array(detection['lb-rb-rt-lt'], dtype=np.float32)
 
-        # Calculate the pixel size of the tag using the average of all four edges
-        tag_pixel_size = (np.linalg.norm(corners[0] - corners[1]) +
-                          np.linalg.norm(corners[1] - corners[2]) +
-                          np.linalg.norm(corners[2] - corners[3]) +
-                          np.linalg.norm(corners[3] - corners[0])) / 4
-
-        # Calculate the distance using the pixel size and convert to millimeters
-        distance_pixel_method = (tag_size * focal_length) / tag_pixel_size * 1000  # Convert to mm
-
         # Define the 3D coordinates of the tag's corners in the tag's coordinate frame
         obj_points = np.array([[-tag_size / 2, -tag_size / 2, 0],
                                [ tag_size / 2, -tag_size / 2, 0],
@@ -85,7 +76,7 @@ while True:
 
             # Display the tag's information on the frame
             tag_id = detection['id']
-            text = f'ID: {tag_id}, Dist: {distance_tvec:.1f} mm, Pixel Dist: {distance_pixel_method:.1f} mm'
+            text = f'ID: {tag_id}, Dist: {distance_tvec:.1f} mm'
             text2 = f'Yaw: {yaw:.1f}, Pitch: {pitch:.1f}, Roll: {roll:.1f}'
             cv2.putText(frame, text, (pt1[0], pt1[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
             cv2.putText(frame, text2, (pt1[0], pt1[1] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
