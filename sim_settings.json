@@ -4,19 +4,24 @@
     "fov_y": 45,
     "near_clip": 0.1,
     "far_clip": 100.0,
-    "tag_size": 10,
+    "size_scale": 2,
+    "tag_size_inner": 5,
+    "tag_size_outer": 9,
     "tags": [
         {
+            "id": 0,
             "image": "tags/tag0.png",
             "position": [0, 0, -70],
             "rotation": [0, 0, 0]
         },
         {
+            "id": 1,
             "image": "tags/tag1.png",
             "position": [-27, 3, -90],
             "rotation": [0, 0, 0]
         },
         {
+            "id": 2,
             "image": "tags/tag2.png",
             "position": [23, -2, -80],
             "rotation": [0, 0, 0]

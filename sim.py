@@ -25,7 +25,9 @@ class Simulation:
         self.fov_y = self.settings["fov_y"]
         self.near_clip = self.settings["near_clip"]
         self.far_clip = self.settings["far_clip"]
-        self.tag_size = self.settings["tag_size"]
+        self.size_scale = self.settings["size_scale"]
+        self.tag_size_inner = self.settings["tag_size_inner"] * self.size_scale
+        self.tag_size_outer = self.settings["tag_size_outer"] * self.size_scale
         self.tags = self.settings["tags"]
 
     def init_pygame(self):
@@ -68,7 +70,44 @@ class Simulation:
                                   [0, 0, 1]])
         dist_coeffs = np.zeros((4, 1))  # Assuming no lens distortion
         camera_params = {'camera_matrix': camera_matrix, 'dist_coeffs': dist_coeffs}
-        self.slam = SLAM(camera_params,tag_size=self.tag_size)
+        self.slam = SLAM(camera_params,tag_size=self.tag_size_inner)
+
+    def ground_truth(self):
+        # Find the tag with the smallest id
+        min_id_tag = min(self.tags, key=lambda tag: tag["id"])
+        
+        # Extract position and rotation
+        position = np.array(min_id_tag["position"])
+        rotation = np.radians(min_id_tag["rotation"])
+        
+        # Create rotation matrix from Euler angles
+        rx = np.array([[1, 0, 0],
+                       [0, np.cos(rotation[0]), -np.sin(rotation[0])],
+                       [0, np.sin(rotation[0]), np.cos(rotation[0])]])
+        
+        ry = np.array([[np.cos(rotation[1]), 0, np.sin(rotation[1])],
+                       [0, 1, 0],
+                       [-np.sin(rotation[1]), 0, np.cos(rotation[1])]])
+        
+        rz = np.array([[np.cos(rotation[2]), -np.sin(rotation[2]), 0],
+                       [np.sin(rotation[2]), np.cos(rotation[2]), 0],
+                       [0, 0, 1]])
+        
+        rotation_matrix = rz @ ry @ rx
+        
+        # Flip y and z axes
+        rotation_matrix[:, 1] = -rotation_matrix[:, 1]
+        rotation_matrix[:, 2] = -rotation_matrix[:, 2]
+        
+        # Invert the translation vector
+        inverted_translation = -position
+        
+        # Combine rotation matrix and inverted translation
+        transformation_matrix = np.eye(4)
+        transformation_matrix[:3, :3] = rotation_matrix
+        transformation_matrix[:3, 3] = inverted_translation
+        
+        return transformation_matrix
 
     def run(self):
         while True:
@@ -87,7 +126,7 @@ class Simulation:
                 glRotatef(rotation[2], 0, 0, 1)  # Rotate around z-axis
                 glBindTexture(GL_TEXTURE_2D, texture)
                 # Render textured quad with size based on tag_size
-                size = self.tag_size / 2
+                size = (self.tag_size_outer) / 2
                 glBegin(GL_QUADS)
                 glTexCoord2f(0, 0); glVertex3f(-size, -size, 0)
                 glTexCoord2f(1, 0); glVertex3f(size, -size, 0)
@@ -121,6 +160,19 @@ class Simulation:
                 rotation_matrix = pose[:3, :3]
                 print("Translation Vector:", translation_vector)
                 print("Rotation Matrix:\n", rotation_matrix)
+                
+                # Compare with ground truth
+                ground_truth_pose = self.ground_truth()
+                gt_translation_vector = ground_truth_pose[:3, 3]
+                gt_rotation_matrix = ground_truth_pose[:3, :3]
+                print("Ground Truth Translation Vector:", gt_translation_vector)
+                print("Ground Truth Rotation Matrix:\n", gt_rotation_matrix)
+                
+                # Calculate differences
+                translation_diff = np.linalg.norm(translation_vector - gt_translation_vector)
+                rotation_diff = np.linalg.norm(rotation_matrix - gt_rotation_matrix)
+                print("Translation Difference:", translation_diff)
+                print("Rotation Difference:", rotation_diff)
             
             pygame.display.flip()
             pygame.time.wait(10)
