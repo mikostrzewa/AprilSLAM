@@ -24,8 +24,9 @@ def load_texture(image_name):
     glBindTexture(GL_TEXTURE_2D, texture_id)
 
     # Set texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    # Ensure Nearest Neighbor Filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
     # Upload texture data
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height,
@@ -35,7 +36,8 @@ def load_texture(image_name):
 def draw_quad(position, texture_id, quad_size):
     x, y, z = position
     width, height = quad_size
-    half_width = width / 200.0  # Scale down for OpenGL units
+    # Ensure Correct Quad Scaling
+    half_width = width / 200.0  # Adjust the division factor if necessary
     half_height = height / 200.0
 
     glPushMatrix()
@@ -59,13 +61,8 @@ def draw_quad(position, texture_id, quad_size):
 def capture_scene(width, height):
     # Read pixels from the OpenGL buffer
     glPixelStorei(GL_PACK_ALIGNMENT, 1)
-    data = glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE)
-    # Convert to numpy array
-    image = np.frombuffer(data, dtype=np.uint8)
-    image = image.reshape((height, width, 3))
-    # Flip the image vertically
-    image = np.flipud(image)
-    return image
+    data = glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE)
+    return data  # Return raw pixel data
 
 def main():
     # Load the camera calibration data
@@ -115,6 +112,12 @@ def main():
     for i, pos in enumerate(positions):
         print(f"Image {i+1}: x={pos[0]}, y={pos[1]}, z={pos[2]}")
 
+    # Disable Lighting and Blending
+    glDisable(GL_LIGHTING)
+    glDisable(GL_BLEND)
+    # Disable Anti-Aliasing
+    glDisable(GL_MULTISAMPLE)
+
     running = True
     while running:
         # Handle events
@@ -133,11 +136,12 @@ def main():
         # Update the display
         pygame.display.flip()
 
-        # Capture the rendered scene
-        image = capture_scene(*display)
-
-        # Convert to grayscale for AprilTag detection
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # Capture the rendered scene correctly
+        image_data = capture_scene(*display)
+        image = Image.frombytes("RGB", display, image_data)
+        image = image.transpose(Image.FLIP_TOP_BOTTOM)
+        image_np = np.array(image)
+        gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
 
         # Detect AprilTags in the image
         detections = detector.detect(gray)
