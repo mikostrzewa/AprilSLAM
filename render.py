@@ -7,55 +7,53 @@ import numpy as np
 import cv2
 from apriltag import apriltag
 
-def loadTexture(image, padding):
+# Constants
+DISPLAY_WIDTH = 1000
+DISPLAY_HEIGHT = 1000
+FOV_Y = 45  # Vertical field of view in degrees
+NEAR_CLIP = 0.1
+FAR_CLIP = 100.0
+
+def loadTexture(image):
     textureSurface = pygame.image.load(image).convert_alpha()
     width = textureSurface.get_width()
     height = textureSurface.get_height()
-    # Create a new surface with white background for padding
-    paddedWidth = width + padding * 2
-    paddedHeight = height + padding * 2
-    paddedSurface = pygame.Surface((paddedWidth, paddedHeight), pygame.SRCALPHA)
-    paddedSurface.fill((255, 255, 255, 255))  # White background
-    # Blit the original image onto the padded surface
-    paddedSurface.blit(textureSurface, (padding, padding))
-    textureData = pygame.image.tostring(paddedSurface, "RGBA", True)
+    textureData = pygame.image.tostring(textureSurface, "RGBA", True)
     texture = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, texture)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, paddedWidth, paddedHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData)
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-    return texture, paddedWidth, paddedHeight
+    return texture, width, height
 
 def main():
     pygame.init()
-    display = (1000, 1000)
+    display = (DISPLAY_WIDTH, DISPLAY_HEIGHT)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     glEnable(GL_TEXTURE_2D)
-    padding = 50  # Amount of padding in pixels
-
+    
     # Load textures for tag0.png, tag1.png, and tag2.png
-    texture0, _, _ = loadTexture('tag0.png', padding)
-    texture1, _, _ = loadTexture('tag1.png', padding)
-    texture2, _, _ = loadTexture('tag2.png', padding)
+    texture0, _, _ = loadTexture('tag0.png')
+    texture1, _, _ = loadTexture('tag1.png')
+    texture2, _, _ = loadTexture('tag2.png')
     
     # Set up a 3D perspective projection
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(45, (display[0] / display[1]), 0.1, 100.0)
+    gluPerspective(FOV_Y, (DISPLAY_WIDTH / DISPLAY_HEIGHT), NEAR_CLIP, FAR_CLIP)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
     # Define positions for each tag in 3D space
     tag_positions = [
-        (texture0, (0, 0, -20)),    # tag0 at center
-        (texture1, (-2, 0, -10)),   # tag1 to the left
-        (texture2, (5, 0, -15)),    # tag2 to the right
+        (texture0, (0, 0, -30)),    # tag0 at center
+        (texture1, (100, 0, -10)),   # tag1 to the left
+        (texture2, (100, 0, -15)),    # tag2 to the right
     ]
     
     # Set up the camera intrinsic parameters
-    fov_y = 45  # Vertical field of view in degrees
-    fov_y_rad = np.deg2rad(fov_y)
-    height = display[1]
-    width = display[0]
+    fov_y_rad = np.deg2rad(FOV_Y)
+    height = DISPLAY_HEIGHT
+    width = DISPLAY_WIDTH
     fy = (height / 2) / np.tan(fov_y_rad / 2)
     fx = fy * (width / height)
     cx = width / 2
@@ -66,7 +64,8 @@ def main():
         [ 0,  0,  1]
     ], dtype=np.float32)
     dist_coeffs = np.zeros(5, dtype=np.float32)
-    tag_size = 0.06  # Actual size of the tag in meters
+    # Calculate the tag size in world render units
+    tag_size = 10  # Adjust this value to match the actual size in your render units
 
     # Initialize the AprilTag detector
     detector = apriltag("tagStandard41h12")
@@ -84,13 +83,18 @@ def main():
             glLoadIdentity()
             glTranslatef(*position)
             glBindTexture(GL_TEXTURE_2D, texture)
-            # Render textured quad
+            # Render textured quad with size 18x18
             glBegin(GL_QUADS)
-            glTexCoord2f(0, 0); glVertex3f(-1, -1, 0)
-            glTexCoord2f(1, 0); glVertex3f(1, -1, 0)
-            glTexCoord2f(1, 1); glVertex3f(1, 1, 0)
-            glTexCoord2f(0, 1); glVertex3f(-1, 1, 0)
+            glTexCoord2f(0, 0); glVertex3i(-9, -9, 0)
+            glTexCoord2f(1, 0); glVertex3i(9, -9, 0)
+            glTexCoord2f(1, 1); glVertex3i(9, 9, 0)
+            glTexCoord2f(0, 1); glVertex3i(-9, 9, 0)
             glEnd()
+            
+            # Get the actual texture size from OpenGL
+            actual_width = glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH)
+            actual_height = glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT)
+            print(f"Rendered texture size: {actual_width}x{actual_height}")
 
         # Capture the rendered image
         width, height = display
@@ -147,7 +151,7 @@ def main():
                 yaw, pitch, roll = np.degrees([yaw, pitch, roll])
 
                 # Calculate the distance using the translation vector and convert to millimeters
-                distance_tvec = np.linalg.norm(tvec) * 1000  # Convert to mm
+                distance_tvec = np.linalg.norm(tvec)
 
                 # Display the tag's information on the image
                 tag_id = detection['id']
