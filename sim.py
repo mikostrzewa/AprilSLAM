@@ -34,9 +34,9 @@ def main():
     glEnable(GL_TEXTURE_2D)
     
     # Load textures for tag0.png, tag1.png, and tag2.png
-    texture0, _, _ = loadTexture('tag0.png')
-    texture1, _, _ = loadTexture('tag1.png')
-    texture2, _, _ = loadTexture('tag2.png')
+    texture0, _, _ = loadTexture('tags/tag0.png')
+    texture1, _, _ = loadTexture('tags/tag1.png')
+    texture2, _, _ = loadTexture('tags/tag2.png')
     
     # Set up a 3D perspective projection
     glMatrixMode(GL_PROJECTION)
