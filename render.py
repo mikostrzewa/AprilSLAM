@@ -14,6 +14,25 @@ FOV_Y = 45  # Vertical field of view in degrees
 NEAR_CLIP = 0.1
 FAR_CLIP = 100.0
 
+def transformation(rvec, tvec):
+    # Convert the rotation vector to a 3x3 rotation matrix
+    rotation_matrix, _ = cv2.Rodrigues(rvec)
+    
+    # Initialize a 4x4 identity matrix for the transformation matrix
+    transformation_matrix = np.eye(4)
+    
+    # Set the upper-left 3x3 part to the rotation matrix
+    transformation_matrix[:3, :3] = rotation_matrix
+    
+    # Set the upper-right 3x1 part to the translation vector
+    transformation_matrix[:3, 3] = tvec.flatten()
+    
+    return transformation_matrix
+
+def invert(T):
+    return np.linalg.inv(T)
+
+
 def loadTexture(image):
     textureSurface = pygame.image.load(image).convert_alpha()
     width = textureSurface.get_width()
