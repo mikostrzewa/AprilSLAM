@@ -80,13 +80,11 @@ while True:
             text2 = f'Yaw: {yaw:.1f}, Pitch: {pitch:.1f}, Roll: {roll:.1f}'
             cv2.putText(frame, text, (pt1[0], pt1[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
             cv2.putText(frame, text2, (pt1[0], pt1[1] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-
             # Draw the coordinate axes on the tag
             cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvec, tvec, 0.05)
 
             # Print the position and distances
             print(f"Tag ID: {tag_id} - Position (x, y, z): {tvec.flatten()} - Distance (tvec): {distance_tvec:.1f} mm")
-            print(f"Pixel-based Distance: {distance_pixel_method:.1f} mm")
             print(f"Yaw: {yaw:.1f}, Pitch: {pitch:.1f}, Roll: {roll:.1f}")
 
     # Display the resulting frame
