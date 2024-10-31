@@ -9,6 +9,8 @@ class SLAM:
         self.camera_matrix = camera_params['camera_matrix']
         self.dist_coeffs = camera_params['dist_coeffs']
         self.tag_graph = {}
+        self.visible_tags = []
+        self.coordinate_id = -1
 
     def transformation(self, rvec, tvec):
         rotation_matrix, _ = cv2.Rodrigues(rvec)
@@ -21,14 +23,12 @@ class SLAM:
         return np.linalg.inv(T)
     
     def detect(self, image):
+        self.visible_tags = []
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         detections = self.detector.detect(gray)
         return detections
     
     def get_pose(self, detection):
-        rvec = detection.pose_R
-        tvec = detection.pose_t
-
         corners = np.array(detection['lb-rb-rt-lt'], dtype=np.float32)
 
         # Define the 3D coordinates of the tag's corners in the tag's coordinate frame
@@ -41,7 +41,8 @@ class SLAM:
         retval, rvec, tvec = cv2.solvePnP(obj_points, corners, self.camera_matrix, self.dist_coeffs)
         T = self.transformation(rvec, tvec)
 
-        self.tag_graph[detection['id']] = self.inversion(T)
+        self.tag_graph[detection['id']] = self.invert(T)
+        self.visible_tags.append(detection['id'])   
         return retval, rvec, tvec
     
     def euler_angles(self, rvec):
@@ -70,9 +71,40 @@ class SLAM:
         
         yaw, pitch, roll = self.euler_angles(rvec)
         distance_tvec = self.distance(tvec)
-        text = f'ID: {tag_id}, Dist: {distance_tvec:.1f} mm'
+        text = f'ID: {tag_id}, Dist: {distance_tvec:.1f} units'
         text2 = f'Yaw: {yaw:.1f}, Pitch: {pitch:.1f}, Roll: {roll:.1f}'
         cv2.putText(image, text, (pt1[0], pt1[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
         cv2.putText(image, text2, (pt1[0], pt1[1] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
         cv2.drawFrameAxes(image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 2)
         return image
+    
+    def get_coordinate_id(self):
+        if self.tag_graph:
+            self.coordinate_id = min(self.tag_graph.keys())
+        return self.coordinate_id
+    
+    def my_pose(self):
+        if not self.visible_tags:
+            return None
+        
+        T_sum = np.zeros((4, 4))
+        count = 0
+        
+        for tag_id in self.visible_tags:
+            T = self.tag_graph.get(tag_id)
+            if T is not None:
+                T_sum += T
+                count += 1
+        
+        if count == 0:
+            return None
+        
+        T_avg = T_sum / count
+        return T_avg
+
+    
+    def graph_global(self):
+        for tag_id, T in self.tag_graph.items():
+            if self.coordinate_id != -1 and tag_id != self.coordinate_id:
+                new_T = np.matmul(self.invert(self.tag_graph[self.coordinate_id]), T)
+                self.tag_graph[tag_id] = new_T

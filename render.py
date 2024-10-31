@@ -6,6 +6,7 @@ from OpenGL.GLU import *
 import numpy as np
 import cv2
 from apriltag import apriltag
+from slam import SLAM
 
 # Constants
 DISPLAY_WIDTH = 1000
@@ -13,24 +14,6 @@ DISPLAY_HEIGHT = 1000
 FOV_Y = 45  # Vertical field of view in degrees
 NEAR_CLIP = 0.1
 FAR_CLIP = 100.0
-
-def transformation(rvec, tvec):
-    # Convert the rotation vector to a 3x3 rotation matrix
-    rotation_matrix, _ = cv2.Rodrigues(rvec)
-    
-    # Initialize a 4x4 identity matrix for the transformation matrix
-    transformation_matrix = np.eye(4)
-    
-    # Set the upper-left 3x3 part to the rotation matrix
-    transformation_matrix[:3, :3] = rotation_matrix
-    
-    # Set the upper-right 3x1 part to the translation vector
-    transformation_matrix[:3, 3] = tvec.flatten()
-    
-    return transformation_matrix
-
-def invert(T):
-    return np.linalg.inv(T)
 
 
 def loadTexture(image):
@@ -64,11 +47,12 @@ def main():
     
     # Define positions and rotations for each tag in 3D space
     tag_positions = [
-        (texture0, (0, 0, -40), (0, 0, 0)),    # tag0 at center with no rotation
-        (texture1, (100, 0, -10), (45, 0, 0)),   # tag1 to the left with 45 degrees rotation around x-axis
-        (texture2, (100, 0, -15), (0, 45, 0)),    # tag2 to the right with 45 degrees rotation around y-axis
+        (texture0, (0, 0, -70), (0, 0, 0)),    # tag0 at center with no rotation
+        (texture1, (-27, 3, -90), (0, 0, 0)),   # tag1 to the left with 45 degrees rotation around x-axis
+        (texture2, (23, -2, -80), (0, 0, 0)),    # tag2 to the right with 45 degrees rotation around y-axis
     ]
     
+    # Initialize SLAM
     # Set up the camera intrinsic parameters
     fov_y_rad = np.deg2rad(FOV_Y)
     height = DISPLAY_HEIGHT
@@ -86,15 +70,14 @@ def main():
     # Calculate the tag size in world render units
     tag_size = 10  # Adjust this value to match the actual size in your render units
 
-    # Initialize the AprilTag detector
-    detector = apriltag("tagStandard41h12")
+    camera_params = {"camera_matrix": camera_matrix, "dist_coeffs": dist_coeffs}
+    slam = SLAM(camera_params,tag_size=tag_size)
     
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
         glClearColor(0.5, 0.0, 0.5, 1.0)  # Clear to purple background
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
        
@@ -116,7 +99,6 @@ def main():
             # Get the actual texture size from OpenGL
             actual_width = glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH)
             actual_height = glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT)
-            print(f"Rendered texture size: {actual_width}x{actual_height}")
 
         # Capture the rendered image
         width, height = display
@@ -124,84 +106,40 @@ def main():
         image = np.frombuffer(data, dtype=np.uint8).reshape(height, width, 3)
         image = np.flipud(image)  # Flip the image vertically
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-        # Convert to grayscale for AprilTag detection
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
+        
         # Detect AprilTags in the frame
-        detections = detector.detect(gray)
-
+        detections = slam.detect(image)
+        
         # Process each detected tag
         for detection in detections:
-            # Extract corner points of the detected AprilTag
-            corners = np.array(detection['lb-rb-rt-lt'], dtype=np.float32)
-
-            # Define the 3D coordinates of the tag's corners in the tag's coordinate frame
-            obj_points = np.array([[-tag_size / 2, -tag_size / 2, 0],
-                               [ tag_size / 2, -tag_size / 2, 0],
-                               [ tag_size / 2,  tag_size / 2, 0],
-                               [-tag_size / 2,  tag_size / 2, 0]], dtype=np.float32)
-
-            # Estimate the pose of the tag
-            retval, rvec, tvec = cv2.solvePnP(obj_points, corners, camera_matrix, dist_coeffs)
-
+            retval, rvec, tvec = slam.get_pose(detection)
             if retval:
-                # Draw the detected tag corners on the image
-                for i in range(4):
-                    pt1 = tuple(map(int, corners[i]))
-                    pt2 = tuple(map(int, corners[(i + 1) % 4]))
-                    cv2.line(image, pt1, pt2, (0, 255, 0), 2)
-
-                # Convert rotation vector to rotation matrix
-                rot_matrix, _ = cv2.Rodrigues(rvec)
-
-                # Calculate yaw, pitch, and roll from the rotation matrix
-                sy = np.sqrt(rot_matrix[0, 0] ** 2 + rot_matrix[1, 0] ** 2)
-                singular = sy < 1e-6
-                if not singular:
-                    yaw = np.arctan2(rot_matrix[0, 2], rot_matrix[2, 2])  # Yaw (rotation about Y-axis)
-                    pitch = np.arctan2(-rot_matrix[1, 2], sy)             # Pitch (rotation about X-axis)
-                    roll = np.arctan2(rot_matrix[1, 0], rot_matrix[1, 1]) # Roll (rotation about Z-axis)
-                else:
-                    yaw = np.arctan2(-rot_matrix[2, 0], rot_matrix[0, 0]) # Yaw (rotation about Y-axis)
-                    pitch = np.arctan2(-rot_matrix[1, 2], sy)             # Pitch (rotation about X-axis)
-                    roll = 0                                             # Roll (rotation about Z-axis)
-
-                # Convert angles to degrees
-                yaw, pitch, roll = np.degrees([yaw, pitch, roll])
-
-                # Calculate the distance using the translation vector and convert to millimeters
-                distance_tvec = np.linalg.norm(tvec)
-
-                # Display the tag's information on the image
-                tag_id = detection['id']
-                text = f'ID: {tag_id}, Dist: {distance_tvec:.1f} mm'
-                text2 = f'Yaw: {yaw:.1f}, Pitch: {pitch:.1f}, Roll: {roll:.1f}'
-                cv2.putText(image, text, (pt1[0], pt1[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-                cv2.putText(image, text2, (pt1[0], pt1[1] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-
-                # Draw the coordinate axes on the tag
-                cv2.drawFrameAxes(image, camera_matrix, dist_coeffs, rvec, tvec, 2)
-
-                # Print the position and distances
-                print(f"Tag ID: {tag_id} - Position (x, y, z): {tvec.flatten()} - Distance (tvec): {distance_tvec:.1f} mm")
-                print(f"Yaw: {yaw:.1f}, Pitch: {pitch:.1f}, Roll: {roll:.1f}")
-
+                corners = np.array(detection['lb-rb-rt-lt'], dtype=np.float32)
+                image = slam.draw(rvec, tvec, corners, image, detection['id'])
+        
         # Display the resulting image with detections
         cv2.imshow('AprilTag Detection', image)
+        slam.get_coordinate_id()
+        slam.graph_global()
 
+        pose = slam.my_pose()
+        if pose is not None:
+            translation_vector = pose[:3, 3]
+            rotation_matrix = pose[:3, :3]
+            print("Translation Vector:", translation_vector)
+            print("Rotation Matrix:\n", rotation_matrix)
+        
         # Swap the OpenGL buffers
         pygame.display.flip()
-        pygame.time.wait(10)
-
+        
         # Break the loop on 'q' key press
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
+    
     # Release resources
     cv2.destroyAllWindows()
     pygame.quit()
     sys.exit()
-        
+
 if __name__ == '__main__':
     main()
