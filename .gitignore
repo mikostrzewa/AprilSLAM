@@ -4,3 +4,4 @@ failed_images.txt
 .DS_Store
 apriltag/
 .venv/
+__pycache__/

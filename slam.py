@@ -2,6 +2,14 @@ import numpy as np
 import cv2
 from apriltag import apriltag
 
+class Node:
+    def __init__(self, local, world, reference):
+        self.local = local
+        self.world = world
+        self.reference = reference
+        # TODO: Implement a weight attribute
+        self.weight = 1
+
 class SLAM:
     def __init__(self, camera_params, tag_type="tagStandard41h12", tag_size=0.06):
         self.detector = apriltag(tag_type)
@@ -26,6 +34,8 @@ class SLAM:
         self.visible_tags = []
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         detections = self.detector.detect(gray)
+        detections = sorted(detections, key=lambda x: x['id'])
+        self.visible_tags = [detection['id'] for detection in detections]
         return detections
     
     def get_pose(self, detection):
@@ -41,8 +51,19 @@ class SLAM:
         retval, rvec, tvec = cv2.solvePnP(obj_points, corners, self.camera_matrix, self.dist_coeffs)
         T = self.transformation(rvec, tvec)
 
-        self.tag_graph[detection['id']] = self.invert(T)
-        self.visible_tags.append(detection['id'])   
+        if self.coordinate_id == -1:
+            self.coordinate_id = detection['id']
+            self.tag_graph[self.coordinate_id] = Node(self.invert(T), np.eye(4), self.coordinate_id)
+        elif detection['id'] < self.coordinate_id:
+            self.coordinate_id = detection['id']
+            self.tag_graph[self.coordinate_id] = Node(self.invert(T), np.eye(4), self.coordinate_id)
+            self.update_world()
+        else:
+            if detection['id'] not in self.tag_graph:
+                reference = min(self.visible_tags)
+                self.tag_graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), reference)
+
+       
         return retval, rvec, tvec
     
     def euler_angles(self, rvec):
@@ -78,11 +99,6 @@ class SLAM:
         cv2.drawFrameAxes(image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 2)
         return image
     
-    def get_coordinate_id(self):
-        if self.tag_graph:
-            self.coordinate_id = min(self.tag_graph.keys())
-        return self.coordinate_id
-    
     def my_pose(self):
         if not self.visible_tags:
             return None
@@ -91,7 +107,8 @@ class SLAM:
         count = 0
         
         for tag_id in self.visible_tags:
-            T = self.tag_graph.get(tag_id)
+            node = self.tag_graph.get(tag_id)
+            T = np.matmul(node.local, node.world)
             if T is not None:
                 T_sum += T
                 count += 1
@@ -101,10 +118,10 @@ class SLAM:
         
         T_avg = T_sum / count
         return T_avg
-
     
-    def graph_global(self):
-        for tag_id, T in self.tag_graph.items():
-            if self.coordinate_id != -1 and tag_id != self.coordinate_id:
-                new_T = np.matmul(self.invert(self.tag_graph[self.coordinate_id]), T)
-                self.tag_graph[tag_id] = new_T
+    def get_world(self,reference,T):
+        return np.matmul(T,self.tag_graph[reference].local)
+    def update_world(self):
+        print("Something went wrong the scene is not static")
+        # TODO: Implement the update_world method
+        pass

@@ -119,8 +119,6 @@ def main():
         
         # Display the resulting image with detections
         cv2.imshow('AprilTag Detection', image)
-        slam.get_coordinate_id()
-        slam.graph_global()
 
         pose = slam.my_pose()
         if pose is not None:
