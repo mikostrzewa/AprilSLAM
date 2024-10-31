@@ -43,11 +43,11 @@ def main():
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
-    # Define positions for each tag in 3D space
+    # Define positions and rotations for each tag in 3D space
     tag_positions = [
-        (texture0, (0, 0, -30)),    # tag0 at center
-        (texture1, (100, 0, -10)),   # tag1 to the left
-        (texture2, (100, 0, -15)),    # tag2 to the right
+        (texture0, (0, 0, -40), (0, 0, 0)),    # tag0 at center with no rotation
+        (texture1, (100, 0, -10), (45, 0, 0)),   # tag1 to the left with 45 degrees rotation around x-axis
+        (texture2, (100, 0, -15), (0, 45, 0)),    # tag2 to the right with 45 degrees rotation around y-axis
     ]
     
     # Set up the camera intrinsic parameters
@@ -79,9 +79,12 @@ def main():
         glClearColor(0.5, 0.0, 0.5, 1.0)  # Clear to purple background
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
        
-        for texture, position in tag_positions:
+        for texture, position, rotation in tag_positions:
             glLoadIdentity()
             glTranslatef(*position)
+            glRotatef(rotation[0], 1, 0, 0)  # Rotate around x-axis
+            glRotatef(rotation[1], 0, 1, 0)  # Rotate around y-axis
+            glRotatef(rotation[2], 0, 0, 1)  # Rotate around z-axis
             glBindTexture(GL_TEXTURE_2D, texture)
             # Render textured quad with size 18x18
             glBegin(GL_QUADS)
@@ -115,12 +118,10 @@ def main():
             corners = np.array(detection['lb-rb-rt-lt'], dtype=np.float32)
 
             # Define the 3D coordinates of the tag's corners in the tag's coordinate frame
-            obj_points = np.array([
-                [-tag_size / 2,  tag_size / 2, 0],  # Top-left corner
-                [ tag_size / 2,  tag_size / 2, 0],  # Top-right corner
-                [ tag_size / 2, -tag_size / 2, 0],  # Bottom-right corner
-                [-tag_size / 2, -tag_size / 2, 0],  # Bottom-left corner
-            ], dtype=np.float32)
+            obj_points = np.array([[-tag_size / 2, -tag_size / 2, 0],
+                               [ tag_size / 2, -tag_size / 2, 0],
+                               [ tag_size / 2,  tag_size / 2, 0],
+                               [-tag_size / 2,  tag_size / 2, 0]], dtype=np.float32)
 
             # Estimate the pose of the tag
             retval, rvec, tvec = cv2.solvePnP(obj_points, corners, camera_matrix, dist_coeffs)
@@ -139,13 +140,13 @@ def main():
                 sy = np.sqrt(rot_matrix[0, 0] ** 2 + rot_matrix[1, 0] ** 2)
                 singular = sy < 1e-6
                 if not singular:
-                    yaw = np.arctan2(rot_matrix[2, 1], rot_matrix[2, 2])
-                    pitch = np.arctan2(-rot_matrix[2, 0], sy)
-                    roll = np.arctan2(rot_matrix[1, 0], rot_matrix[0, 0])
+                    yaw = np.arctan2(rot_matrix[0, 2], rot_matrix[2, 2])  # Yaw (rotation about Y-axis)
+                    pitch = np.arctan2(-rot_matrix[1, 2], sy)             # Pitch (rotation about X-axis)
+                    roll = np.arctan2(rot_matrix[1, 0], rot_matrix[1, 1]) # Roll (rotation about Z-axis)
                 else:
-                    yaw = np.arctan2(-rot_matrix[1, 2], rot_matrix[1, 1])
-                    pitch = np.arctan2(-rot_matrix[2, 0], sy)
-                    roll = 0
+                    yaw = np.arctan2(-rot_matrix[2, 0], rot_matrix[0, 0]) # Yaw (rotation about Y-axis)
+                    pitch = np.arctan2(-rot_matrix[1, 2], sy)             # Pitch (rotation about X-axis)
+                    roll = 0                                             # Roll (rotation about Z-axis)
 
                 # Convert angles to degrees
                 yaw, pitch, roll = np.degrees([yaw, pitch, roll])
@@ -161,7 +162,7 @@ def main():
                 cv2.putText(image, text2, (pt1[0], pt1[1] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
                 # Draw the coordinate axes on the tag
-                cv2.drawFrameAxes(image, camera_matrix, dist_coeffs, rvec, tvec, 0.05)
+                cv2.drawFrameAxes(image, camera_matrix, dist_coeffs, rvec, tvec, 2)
 
                 # Print the position and distances
                 print(f"Tag ID: {tag_id} - Position (x, y, z): {tvec.flatten()} - Distance (tvec): {distance_tvec:.1f} mm")
