@@ -3,12 +3,11 @@ import cv2
 from apriltag import apriltag
 
 class Node:
-    def __init__(self, local, world, reference):
+    def __init__(self, local, world, reference, weight=1):
         self.local = local
         self.world = world
         self.reference = reference
-        # TODO: Implement a weight attribute
-        self.weight = 1
+        self.weight = weight
 
 class SLAM:
     def __init__(self, camera_params, tag_type="tagStandard41h12", tag_size=0.06):
@@ -57,10 +56,12 @@ class SLAM:
         elif detection['id'] < self.coordinate_id:
             self.coordinate_id = detection['id']
             self.tag_graph[self.coordinate_id] = Node(self.invert(T), np.eye(4), self.coordinate_id)
-            self.update_world()
+            self.update_world() #This updates all transformations for the new world coordinate
         else:
             reference = min(self.visible_tags)
-            self.tag_graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), reference)
+            if(reference != self.coordinate_id):
+                print("Something went wrong the scene is not static")
+            self.tag_graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), reference, self.tag_graph[reference].weight+1)
 
        
         return retval, rvec, tvec
@@ -109,8 +110,8 @@ class SLAM:
             node = self.tag_graph.get(tag_id)
             T = np.matmul(node.local, node.world)
             if T is not None:
-                T_sum += T
-                count += 1
+                T_sum += T/node.weight
+                count += 1/ node.weight
         
         if count == 0:
             return None

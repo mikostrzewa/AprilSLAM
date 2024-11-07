@@ -208,7 +208,7 @@ class Simulation:
                 print("Ground Truth Rotation Matrix:\n", gt_rotation_matrix)
 
                 # Calculate differences
-                translation_diff = nsp.linalg.norm(translation_vector - gt_translation_vector)
+                translation_diff = np.linalg.norm(translation_vector - gt_translation_vector)
                 rotation_diff = np.linalg.norm(rotation_matrix - gt_rotation_matrix)
                 print("Translation Difference:", translation_diff)
                 print("Rotation Difference:", rotation_diff)
