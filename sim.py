@@ -16,6 +16,9 @@ class Simulation:
         self.load_textures()
         self.init_opengl()
         self.init_slam()
+        self.camera_position = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        self.movement_speed = 0.1 * self.size_scale
+        self.key_state = {pygame.K_LEFT: False, pygame.K_RIGHT: False, pygame.K_UP: False, pygame.K_DOWN: False, pygame.K_w: False, pygame.K_s: False}
 
     def load_settings(self, settings_file):
         with open(settings_file, 'r') as f:
@@ -37,10 +40,12 @@ class Simulation:
         glEnable(GL_TEXTURE_2D)
 
     def load_textures(self):
-        self.textures = []
+        self.tags_data = []
         for tag in self.tags:
             texture, _, _ = self.load_texture(tag["image"])
-            self.textures.append((texture, tag["position"], tag["rotation"]))
+            position = np.array(tag["position"], dtype=np.float32)
+            rotation = np.array(tag["rotation"], dtype=np.float32)
+            self.tags_data.append({"id": tag["id"], "texture": texture, "position": position, "rotation": rotation})
 
     def load_texture(self, image):
         textureSurface = pygame.image.load(image).convert_alpha()
@@ -70,41 +75,53 @@ class Simulation:
                                   [0, 0, 1]])
         dist_coeffs = np.zeros((4, 1))  # Assuming no lens distortion
         camera_params = {'camera_matrix': camera_matrix, 'dist_coeffs': dist_coeffs}
-        self.slam = SLAM(camera_params,tag_size=self.tag_size_inner)
+        self.slam = SLAM(camera_params, tag_size=self.tag_size_inner)
 
     def ground_truth(self):
         # Find the tag with the smallest id
-        min_id_tag = min(self.tags, key=lambda tag: tag["id"])
+        min_id_tag = min(self.tags_data, key=lambda tag: tag["id"])
         
-        # Extract position and rotation
-        position = np.array(min_id_tag["position"])
+        # Adjust tag position by subtracting camera position
+        position = min_id_tag["position"] - self.camera_position
+
+        # Flip y and z axes (OpenGL coordinate system adjustment)
+        position[1:] = -position[1:]  # Flip y and z axes
+        
+        # Extract rotation
         rotation = np.radians(min_id_tag["rotation"])
         
-        # Create rotation matrix from Euler angles
-        rx = np.array([[1, 0, 0],
-                       [0, np.cos(rotation[0]), -np.sin(rotation[0])],
-                       [0, np.sin(rotation[0]), np.cos(rotation[0])]])
+        # Create rotation matrix from Euler angles (using the ZYX convention)
+        rz = np.array([[np.cos(rotation[2]), -np.sin(rotation[2]), 0],
+                       [np.sin(rotation[2]), np.cos(rotation[2]), 0],
+                       [0, 0, 1]])
         
         ry = np.array([[np.cos(rotation[1]), 0, np.sin(rotation[1])],
                        [0, 1, 0],
                        [-np.sin(rotation[1]), 0, np.cos(rotation[1])]])
         
-        rz = np.array([[np.cos(rotation[2]), -np.sin(rotation[2]), 0],
-                       [np.sin(rotation[2]), np.cos(rotation[2]), 0],
-                       [0, 0, 1]])
+        rx = np.array([[1, 0, 0],
+                       [0, np.cos(rotation[0]), -np.sin(rotation[0])],
+                       [0, np.sin(rotation[0]), np.cos(rotation[0])]])
         
+        # Combined rotation matrix (rotation order: ZYX)
         rotation_matrix = rz @ ry @ rx
+
+        # Flip axes to match the coordinate system
+        flip_x = np.array([[1, 0, 0],
+                           [0, -1, 0],
+                           [0, 0, -1]])
         
-        # Flip y and z axes
-        rotation_matrix[:, 1] = -rotation_matrix[:, 1]
-        rotation_matrix[:, 2] = -rotation_matrix[:, 2]
+        rotation_matrix = flip_x @ rotation_matrix
         
-        # Invert the translation vector
-        inverted_translation = -position
+        # Invert the rotation matrix (transpose for orthogonal matrices)
+        inverse_rotation_matrix = rotation_matrix.T
         
-        # Combine rotation matrix and inverted translation
+        # Invert the translation vector using the inverse rotation matrix
+        inverted_translation = -inverse_rotation_matrix @ position
+        
+        # Combine rotation matrix and inverted translation to form the transformation matrix
         transformation_matrix = np.eye(4)
-        transformation_matrix[:3, :3] = rotation_matrix
+        transformation_matrix[:3, :3] = inverse_rotation_matrix
         transformation_matrix[:3, 3] = inverted_translation
         
         return transformation_matrix
@@ -115,16 +132,38 @@ class Simulation:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key in self.key_state:
+                        self.key_state[event.key] = True
+                elif event.type == pygame.KEYUP:
+                    if event.key in self.key_state:
+                        self.key_state[event.key] = False
+
+            if self.key_state[pygame.K_LEFT]:
+                self.camera_position[0] -= self.movement_speed
+            if self.key_state[pygame.K_RIGHT]:
+                self.camera_position[0] += self.movement_speed
+            if self.key_state[pygame.K_UP]:
+                self.camera_position[1] += self.movement_speed
+            if self.key_state[pygame.K_DOWN]:
+                self.camera_position[1] -= self.movement_speed
+            if self.key_state[pygame.K_w]:
+                self.camera_position[2] -= self.movement_speed
+            if self.key_state[pygame.K_s]:
+                self.camera_position[2] += self.movement_speed
+
             glClearColor(0.5, 0.0, 0.5, 1.0)  # Clear to purple background
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            
-            for texture, position, rotation in self.textures:
+
+            for tag in self.tags_data:
                 glLoadIdentity()
-                glTranslatef(*position)
+                tag_position = tag["position"] - self.camera_position
+                glTranslatef(*tag_position)
+                rotation = tag["rotation"]
                 glRotatef(rotation[0], 1, 0, 0)  # Rotate around x-axis
                 glRotatef(rotation[1], 0, 1, 0)  # Rotate around y-axis
                 glRotatef(rotation[2], 0, 0, 1)  # Rotate around z-axis
-                glBindTexture(GL_TEXTURE_2D, texture)
+                glBindTexture(GL_TEXTURE_2D, tag["texture"])
                 # Render textured quad with size based on tag_size
                 size = (self.tag_size_outer) / 2
                 glBegin(GL_QUADS)
@@ -133,24 +172,24 @@ class Simulation:
                 glTexCoord2f(1, 1); glVertex3f(size, size, 0)
                 glTexCoord2f(0, 1); glVertex3f(-size, size, 0)
                 glEnd()
-            
+
             # Capture the rendered image
             width, height = self.display
             data = glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE)
             image = np.frombuffer(data, dtype=np.uint8).reshape(height, width, 3)
             image = np.flipud(image)  # Flip the image vertically
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            
+
             # Detect AprilTags in the frame
             detections = self.slam.detect(image)
-            
+
             # Process each detected tag
             for detection in detections:
                 retval, rvec, tvec = self.slam.get_pose(detection)
                 if retval:
                     corners = np.array(detection['lb-rb-rt-lt'], dtype=np.float32)
                     image = self.slam.draw(rvec, tvec, corners, image, detection['id'])
-            
+
             # Display the resulting image with detections
             cv2.imshow('AprilTag Detection', image)
 
@@ -158,22 +197,22 @@ class Simulation:
             if pose is not None:
                 translation_vector = pose[:3, 3]
                 rotation_matrix = pose[:3, :3]
-                print("Translation Vector:", translation_vector)
-                print("Rotation Matrix:\n", rotation_matrix)
-                
+                print("Estimated Translation Vector:", translation_vector)
+                print("Estimated Rotation Matrix:\n", rotation_matrix)
+
                 # Compare with ground truth
                 ground_truth_pose = self.ground_truth()
                 gt_translation_vector = ground_truth_pose[:3, 3]
                 gt_rotation_matrix = ground_truth_pose[:3, :3]
                 print("Ground Truth Translation Vector:", gt_translation_vector)
                 print("Ground Truth Rotation Matrix:\n", gt_rotation_matrix)
-                
+
                 # Calculate differences
-                translation_diff = np.linalg.norm(translation_vector - gt_translation_vector)
+                translation_diff = nsp.linalg.norm(translation_vector - gt_translation_vector)
                 rotation_diff = np.linalg.norm(rotation_matrix - gt_rotation_matrix)
                 print("Translation Difference:", translation_diff)
                 print("Rotation Difference:", rotation_diff)
-            
+
             pygame.display.flip()
             pygame.time.wait(10)
 

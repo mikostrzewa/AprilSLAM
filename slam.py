@@ -51,7 +51,7 @@ class SLAM:
         retval, rvec, tvec = cv2.solvePnP(obj_points, corners, self.camera_matrix, self.dist_coeffs)
         T = self.transformation(rvec, tvec)
 
-        if self.coordinate_id == -1:
+        if self.coordinate_id == -1 or self.coordinate_id == detection['id']:
             self.coordinate_id = detection['id']
             self.tag_graph[self.coordinate_id] = Node(self.invert(T), np.eye(4), self.coordinate_id)
         elif detection['id'] < self.coordinate_id:
@@ -59,9 +59,8 @@ class SLAM:
             self.tag_graph[self.coordinate_id] = Node(self.invert(T), np.eye(4), self.coordinate_id)
             self.update_world()
         else:
-            if detection['id'] not in self.tag_graph:
-                reference = min(self.visible_tags)
-                self.tag_graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), reference)
+            reference = min(self.visible_tags)
+            self.tag_graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), reference)
 
        
         return retval, rvec, tvec

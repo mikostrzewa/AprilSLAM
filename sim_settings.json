@@ -3,7 +3,7 @@
     "display_height": 1000,
     "fov_y": 45,
     "near_clip": 0.1,
-    "far_clip": 100.0,
+    "far_clip": 300.0,
     "size_scale": 2,
     "tag_size_inner": 5,
     "tag_size_outer": 9,
@@ -11,20 +11,20 @@
         {
             "id": 0,
             "image": "tags/tag0.png",
-            "position": [0, 0, -70],
-            "rotation": [0, 0, 0]
+            "position": [5, 0, -90],
+            "rotation": [20, 0, 0]
         },
         {
             "id": 1,
             "image": "tags/tag1.png",
-            "position": [-27, 3, -90],
-            "rotation": [0, 0, 0]
+            "position": [-27, 1, -90],
+            "rotation": [0, 30, 0]
         },
         {
             "id": 2,
             "image": "tags/tag2.png",
-            "position": [23, -2, -80],
-            "rotation": [0, 0, 0]
+            "position": [23, 3, -80],
+            "rotation": [0, 0, 90]
         }
     ]
 }
