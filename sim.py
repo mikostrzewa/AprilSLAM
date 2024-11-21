@@ -9,6 +9,8 @@ import cv2
 from apriltag import apriltag
 from slam import SLAM
 
+#TODO: Error collection and analysis
+
 class Simulation:
     def __init__(self, settings_file):
         self.load_settings(settings_file)
@@ -19,6 +21,7 @@ class Simulation:
         self.camera_position = np.array([0.0, 0.0, 0.0], dtype=np.float32)
         self.movement_speed = 0.1 * self.size_scale
         self.key_state = {pygame.K_LEFT: False, pygame.K_RIGHT: False, pygame.K_UP: False, pygame.K_DOWN: False, pygame.K_w: False, pygame.K_s: False}
+        
 
     def load_settings(self, settings_file):
         with open(settings_file, 'r') as f:
@@ -212,10 +215,14 @@ class Simulation:
                 rotation_diff = np.linalg.norm(rotation_matrix - gt_rotation_matrix)
                 print("Translation Difference:", translation_diff)
                 print("Rotation Difference:", rotation_diff)
+                self.slam.vis_slam(ground_truth=ground_truth_pose)
 
+            self.slam.slam_graph()
+            
             pygame.display.flip()
-            pygame.time.wait(10)
+            pygame.time.wait(1)
 
+    
 if __name__ == '__main__':
     sim = Simulation('sim_settings.json')
     sim.run()

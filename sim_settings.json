@@ -25,6 +25,18 @@
             "image": "tags/tag2.png",
             "position": [23, 3, -80],
             "rotation": [0, 0, 0]
+        },
+        {
+            "id": 3,
+            "image": "tags/tag3.png",
+            "position": [50, 0, -70],
+            "rotation": [0, 0, 0]
+        },
+        {
+            "id": 4,
+            "image": "tags/tag4.png",
+            "position": [75, 2, -60],
+            "rotation": [0, 0, 0]
         }
     ]
 }
