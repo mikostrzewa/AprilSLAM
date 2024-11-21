@@ -5,6 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+# TODO: Add flexibility with the world tag
 class Node:
     def __init__(self, local, world, reference, weight=1, updated=True, visible=False):
         self.local = local
@@ -159,6 +160,23 @@ class SLAM:
         print("No world update")
         # TODO: Implement the update_world method
         pass
+
+    def average_distance_to_nodes(self):
+        total_distance = 0
+        node_count = 0
+
+        for node in self.graph.values():
+            translation = node.local[:3, 3]
+            distance = np.linalg.norm(translation)
+            total_distance += distance
+            node_count += 1
+
+        if node_count == 0:
+            return 0
+
+        average_distance = total_distance / node_count
+        return average_distance
+
     def slam_graph(self):
         G = nx.Graph()
         for node_id, node in self.graph.items():

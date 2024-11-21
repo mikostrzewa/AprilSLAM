@@ -5,3 +5,4 @@ failed_images.txt
 apriltag/
 .venv/
 __pycache__/
+error_data.csv

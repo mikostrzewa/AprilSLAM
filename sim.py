@@ -8,9 +8,11 @@ import numpy as np
 import cv2
 from apriltag import apriltag
 from slam import SLAM
+import csv
+import time
 
 #TODO: Error collection and analysis
-
+#TODO: Add covarince matrix to the graph
 class Simulation:
     def __init__(self, settings_file):
         self.load_settings(settings_file)
@@ -19,10 +21,35 @@ class Simulation:
         self.init_opengl()
         self.init_slam()
         self.camera_position = np.array([0.0, 0.0, 0.0], dtype=np.float32)
-        self.movement_speed = 0.1 * self.size_scale
+        self.movement_speed = 1 * self.size_scale
         self.key_state = {pygame.K_LEFT: False, pygame.K_RIGHT: False, pygame.K_UP: False, pygame.K_DOWN: False, pygame.K_w: False, pygame.K_s: False}
+        self.start_time = time.time()
+        self.csvfile = open('error_data.csv', 'w', newline='')
+        self.csvwriter = csv.writer(self.csvfile)
+        # Write the header
+        self.csvwriter.writerow([
+            'Time','Number of Nodes',"Avrg Distance",
+            'Est_X', 'Est_Y', 'Est_Z',
+            'Est_Roll', 'Est_Pitch', 'Est_Yaw',
+            'GT_X', 'GT_Y', 'GT_Z',
+            'GT_Roll', 'GT_Pitch', 'GT_Yaw','Translation Difference','Rotation Difference'
+        ])
         
+    def rotation_matrix_to_euler_angles(self,R):
+        sy = np.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
 
+        singular = sy < 1e-6
+
+        if not singular:
+            x = np.arctan2(R[2, 1], R[2, 2])
+            y = np.arctan2(-R[2, 0], sy)
+            z = np.arctan2(R[1, 0], R[0, 0])
+        else:
+            x = np.arctan2(-R[1, 2], R[1, 1])
+            y = np.arctan2(-R[2, 0], sy)
+            z = 0
+
+        return np.array([x, y, z])
     def load_settings(self, settings_file):
         with open(settings_file, 'r') as f:
             self.settings = json.load(f)
@@ -217,6 +244,29 @@ class Simulation:
                 print("Rotation Difference:", rotation_diff)
                 self.slam.vis_slam(ground_truth=ground_truth_pose)
 
+                current_time = time.time() - self.start_time
+                 # Estimated pose
+                translation_vector = pose[:3, 3]
+                rotation_matrix = pose[:3, :3]
+                est_angles = self.rotation_matrix_to_euler_angles(rotation_matrix)
+
+                # Ground truth pose
+                ground_truth_pose = self.ground_truth()
+                gt_translation_vector = ground_truth_pose[:3, 3]
+                gt_rotation_matrix = ground_truth_pose[:3, :3]
+                gt_angles = self.rotation_matrix_to_euler_angles(gt_rotation_matrix)
+
+                # Write data to CSV
+                
+                self.csvwriter.writerow([
+                    current_time,len(self.slam.graph),self.slam.average_distance_to_nodes(),
+                    translation_vector[0], translation_vector[1], translation_vector[2],
+                    est_angles[0], est_angles[1], est_angles[2],
+                    gt_translation_vector[0], gt_translation_vector[1], gt_translation_vector[2],
+                    gt_angles[0], gt_angles[1], gt_angles[2],translation_diff,rotation_diff
+                ])
+                
+
             self.slam.slam_graph()
             
             pygame.display.flip()
@@ -225,4 +275,9 @@ class Simulation:
     
 if __name__ == '__main__':
     sim = Simulation('sim_settings.json')
-    sim.run()
+    try:
+        sim.run()
+    except KeyboardInterrupt:
+        sim.csvfile.close()
+        pygame.quit()
+        sys.exit()
