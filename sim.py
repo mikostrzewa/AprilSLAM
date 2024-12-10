@@ -11,7 +11,6 @@ from slam import SLAM
 import csv
 import time
 
-#TODO: Error collection and analysis
 #TODO: Add covarince matrix to the graph
 class Simulation:
     def __init__(self, settings_file):
@@ -107,18 +106,18 @@ class Simulation:
         camera_params = {'camera_matrix': camera_matrix, 'dist_coeffs': dist_coeffs}
         self.slam = SLAM(camera_params, tag_size=self.tag_size_inner)
 
-    def ground_truth(self):
+    def ground_truth(self,tag_id=0):
         # Find the tag with the smallest id
-        min_id_tag = min(self.tags_data, key=lambda tag: tag["id"])
+        tag = self.tags_data[tag_id]
         
         # Adjust tag position by subtracting camera position
-        position = min_id_tag["position"] - self.camera_position
+        position = tag["position"] - self.camera_position
 
         # Flip y and z axes (OpenGL coordinate system adjustment)
         position[1:] = -position[1:]  # Flip y and z axes
         
         # Extract rotation
-        rotation = np.radians(min_id_tag["rotation"])
+        rotation = np.radians(tag["rotation"])
         
         # Create rotation matrix from Euler angles (using the ZYX convention)
         rz = np.array([[np.cos(rotation[2]), -np.sin(rotation[2]), 0],
@@ -156,6 +155,14 @@ class Simulation:
         
         return transformation_matrix
 
+    def ground_truth_difference(self, tag1_id, tag2_id):
+        tag1 = self.tags_data[tag1_id]
+        tag2 = self.tags_data[tag2_id]
+        trans_diff = np.linalg.norm(tag1["position"] - tag2["position"])
+
+        return trans_diff
+
+        pass
     def run(self):
         while True:
             for event in pygame.event.get():
@@ -229,6 +236,18 @@ class Simulation:
                 rotation_matrix = pose[:3, :3]
                 print("Estimated Translation Vector:", translation_vector)
                 print("Estimated Rotation Matrix:\n", rotation_matrix)
+
+                ground_truth_tags = [{} for _ in range(len(self.slam.graph))]
+                for tag_id, node in self.slam.graph.items():
+                    true_pose = self.ground_truth(tag_id)
+                    translation_dist = np.linalg.norm(true_pose[:3, 3])
+                    ground_truth_tags[tag_id]["local"] = translation_dist
+
+                    tag_to_world = np.linalg.norm(self.ground_truth_difference(self.slam.coordinate_id, tag_id))
+                    ground_truth_tags[tag_id]["world"] = tag_to_world
+
+                
+                self.slam.error_graph(ground_truth_tags)
 
                 # Compare with ground truth
                 ground_truth_pose = self.ground_truth()

@@ -18,7 +18,7 @@ focal_length = camera_matrix[0, 0]  # fx from the intrinsic matrix
 detector = apriltag("tagStandard41h12")
 
 # Start capturing video from the webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 while True:
     # Capture frame-by-frame
