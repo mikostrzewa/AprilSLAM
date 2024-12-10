@@ -288,9 +288,9 @@ class SLAM:
         pos = nx.planar_layout(G)
         
         # Define thresholds for edge colors
-        GREEN_THRESHOLD = 0.1
-        YELLOW_THRESHOLD = 0.5
-        ORANGE_THRESHOLD = 1.0
+        GREEN_THRESHOLD = 1
+        YELLOW_THRESHOLD = 2.5
+        ORANGE_THRESHOLD = 5
 
         edge_colors = []
         for _, _, d in G.edges(data=True):
@@ -321,9 +321,6 @@ class SLAM:
         
         # Add legend
         legend_elements = [
-            Line2D([0], [0], marker='o', color='w', label='Not Visible', markersize=10, markerfacecolor='red'),
-            Line2D([0], [0], marker='o', color='w', label='Not Updated', markersize=10, markerfacecolor='orange'),
-            Line2D([0], [0], marker='o', color='w', label='Updated', markersize=10, markerfacecolor='green'),
             Line2D([0], [0], color='green', lw=2, label='Low Error'),
             Line2D([0], [0], color='yellow', lw=2, label='Moderate Error'),
             Line2D([0], [0], color='orange', lw=2, label='High Error'),

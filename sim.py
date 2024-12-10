@@ -157,6 +157,7 @@ class Simulation:
         return transformation_matrix
 
     def ground_truth_difference(self, tag1_id, tag2_id):
+        #FIXME: This function is not working and it raises important questions
         tag1 = self.tags_data[tag1_id]
         tag2 = self.tags_data[tag2_id]
         trans_diff = np.linalg.norm(tag1["position"] - tag2["position"])
@@ -193,7 +194,16 @@ class Simulation:
             glClearColor(0.5, 0.0, 0.5, 1.0)  # Clear to purple background
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+            # Sort tags by z position from lowest to highest
+            tags_with_z = []
             for tag in self.tags_data:
+                tag_position = tag["position"] - self.camera_position
+                z_pos = tag_position[2]
+                tags_with_z.append((z_pos, tag))
+
+            tags_sorted = sorted(tags_with_z, key=lambda x: x[0])
+
+            for z_pos, tag in tags_sorted:
                 glLoadIdentity()
                 tag_position = tag["position"] - self.camera_position
                 glTranslatef(*tag_position)

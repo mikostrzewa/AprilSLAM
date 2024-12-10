@@ -18,13 +18,13 @@
             "id": 1,
             "image": "tags/tag1.png",
             "position": [-30, 0, -120],
-            "rotation": [0, 30, 0]
+            "rotation": [0, 0, 0]
         },
         {
             "id": 2,
             "image": "tags/tag2.png",
             "position": [25, 15, -85],
-            "rotation": [10, 10, 0]
+            "rotation": [0, 0, 0]
         },
         {
             "id": 3,
