@@ -12,6 +12,7 @@ import csv
 import time
 
 #TODO: Add covarince matrix to the graph
+#TODO: Rendering priority based on distance
 class Simulation:
     def __init__(self, settings_file):
         self.load_settings(settings_file)
@@ -107,7 +108,7 @@ class Simulation:
         self.slam = SLAM(camera_params, tag_size=self.tag_size_inner)
 
     def ground_truth(self,tag_id=0):
-        # Find the tag with the smallest id
+
         tag = self.tags_data[tag_id]
         
         # Adjust tag position by subtracting camera position
@@ -243,7 +244,9 @@ class Simulation:
                     translation_dist = np.linalg.norm(true_pose[:3, 3])
                     ground_truth_tags[tag_id]["local"] = translation_dist
 
-                    tag_to_world = np.linalg.norm(self.ground_truth_difference(self.slam.coordinate_id, tag_id))
+                    #tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
+
+                    tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
                     ground_truth_tags[tag_id]["world"] = tag_to_world
 
                 

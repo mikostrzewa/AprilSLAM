@@ -7,6 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
 
 # TODO: Add flexibility with the world tag
+
 class Node:
     def __init__(self, local, world, reference, weight=1, updated=True, visible=False):
         self.local = local
@@ -277,10 +278,10 @@ class SLAM:
             G.add_node(node_id)
         for node_id, node in self.graph.items():
             if node.reference in self.graph:
-                diff_world = np.linalg.norm(node.world[:3, 3] - ground_truth_graph[node_id]["world"])
+                diff_world = abs(np.linalg.norm(node.world[:3, 3]) - ground_truth_graph[node_id]["world"])
                 G.add_edge(node_id, node.reference, weight=round(diff_world, 3))
 
-                diff_local = np.linalg.norm(node.local[:3, 3] - ground_truth_graph[node_id]["local"])
+                diff_local = abs(np.linalg.norm(node.local[:3, 3]) - ground_truth_graph[node_id]["local"])
                 G.add_edge(node_id, "Camera", weight=round(diff_local, 3))
 
         self.ax_err.cla()  # Clear the current axes
