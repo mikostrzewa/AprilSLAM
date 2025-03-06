@@ -66,7 +66,6 @@ class SLAM:
         # Estimate the pose of the tag
         retval, rvec, tvec = cv2.solvePnP(obj_points, corners, self.camera_matrix, self.dist_coeffs)
         T = self.transformation(rvec, tvec)
-        
 
         if self.coordinate_id == -1 or self.coordinate_id == detection['id']:
             self.coordinate_id = detection['id']
@@ -279,6 +278,7 @@ class SLAM:
         for node_id, node in self.graph.items():
             if node.reference in self.graph:
                 diff_world = abs(np.linalg.norm(node.world[:3, 3]) - ground_truth_graph[node_id]["world"])
+
                 G.add_edge(node_id, node.reference, weight=round(diff_world, 3))
 
                 diff_local = abs(np.linalg.norm(node.local[:3, 3]) - ground_truth_graph[node_id]["local"])

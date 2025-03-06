@@ -25,7 +25,9 @@ class Simulation:
         self.key_state = {pygame.K_LEFT: False, pygame.K_RIGHT: False, pygame.K_UP: False, pygame.K_DOWN: False, pygame.K_w: False, pygame.K_s: False}
         self.start_time = time.time()
         self.csvfile = open('error_data.csv', 'w', newline='')
+        self.error_file = open('error_params.csv', 'w', newline='')
         self.csvwriter = csv.writer(self.csvfile)
+        self.csvwriter_errors = csv.writer(self.error_file)
         # Write the header
         self.csvwriter.writerow([
             'Time','Number of Nodes',"Avrg Distance",
@@ -35,6 +37,14 @@ class Simulation:
             'GT_Roll', 'GT_Pitch', 'GT_Yaw','Translation Difference','Rotation Difference'
         ])
         
+        self.csvwriter_errors.writerow([
+            'Number of Jumps',
+            'Est_X_Local', 'Est_Y_Local', 'Est_Z_Local',
+            'Est_Roll_Local', 'Est_Pitch_Local', 'Est_Yaw_Local',
+            'Est_X_World', 'Est_Y_World', 'Est_Z_World',
+            'Est_Roll_World', 'Est_Pitch_World', 'Est_Yaw_World',
+            'Error_World', 'Error_Local',
+        ])
     def rotation_matrix_to_euler_angles(self,R):
         sy = np.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
 
@@ -160,7 +170,7 @@ class Simulation:
         #FIXME: This function is not working and it raises important questions
         tag1 = self.tags_data[tag1_id]
         tag2 = self.tags_data[tag2_id]
-        trans_diff = np.linalg.norm(tag1["position"] - tag2["position"])
+        trans_diff = np.linalg.norm((tag1["position"]-self.camera_position) - (tag2["position"]-self.camera_position))
 
         return trans_diff
 
@@ -208,9 +218,9 @@ class Simulation:
                 tag_position = tag["position"] - self.camera_position
                 glTranslatef(*tag_position)
                 rotation = tag["rotation"]
-                glRotatef(rotation[0], 1, 0, 0)  # Rotate around x-axis
-                glRotatef(rotation[1], 0, 1, 0)  # Rotate around y-axis
-                glRotatef(rotation[2], 0, 0, 1)  # Rotate around z-axis
+                glRotatef(rotation[2], 0, 0, 1)  # Rotate around global z-axis
+                glRotatef(rotation[1], 0, 1, 0)  # Rotate around global y-axis
+                glRotatef(rotation[0], 1, 0, 0)  # Rotate around global x-axis
                 glBindTexture(GL_TEXTURE_2D, tag["texture"])
                 # Render textured quad with size based on tag_size
                 size = (self.tag_size_outer) / 2
@@ -255,9 +265,30 @@ class Simulation:
                     ground_truth_tags[tag_id]["local"] = translation_dist
 
                     #tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
-
                     tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
                     ground_truth_tags[tag_id]["world"] = tag_to_world
+
+                    diff_world = abs(np.linalg.norm(node.world[:3, 3]) - tag_to_world)
+
+                    diff_local = abs(np.linalg.norm(node.local[:3, 3]) - translation_dist)
+                    
+                    translation_local = node.local[:3, 3]
+                    angles_local = self.rotation_matrix_to_euler_angles(node.local[:3, :3])
+
+                    translation_world = node.world[:3, 3]
+                    angles_world = self.rotation_matrix_to_euler_angles(node.world[:3, :3])
+
+                    self.csvwriter_errors.writerow([
+                        node.weight,  # Replace with actual number of jumps if available
+                        *translation_local,
+                        *angles_local,
+                        *translation_world,
+                        *angles_world,
+                        diff_world,
+                        diff_local,
+                    ])
+                
+
 
                 
                 self.slam.error_graph(ground_truth_tags)
