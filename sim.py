@@ -20,11 +20,15 @@ from termcolor import colored
 
 logging.basicConfig(
     filename='last_run.log',  # name of the file
-    level=logging.INFO,          # level of messages to capture
+    level=logging.DEBUG,          # level of messages to capture
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 class Simulation:
     def __init__(self, settings_file):
+        # Clear the log file at the start of the simulation
+        if os.path.exists('last_run.log'):
+            open('last_run.log', 'w').close()
+            logging.info("Simulation started")
         self.load_settings(settings_file)
         self.init_pygame()
         self.load_textures()
@@ -81,7 +85,9 @@ class Simulation:
         self.size_scale = self.settings["size_scale"]
         self.tag_size_inner = self.settings["tag_size_inner"] * self.size_scale
         self.tag_size_outer = self.settings["tag_size_outer"] * self.size_scale
+        self.actual_tag_size = self.settings["actual_size_in_mm"]
         self.tags = self.settings["tags"]
+
 
     def init_pygame(self):
         pygame.init()
@@ -101,6 +107,7 @@ class Simulation:
         textureSurface = pygame.image.load(image).convert_alpha()
         width = textureSurface.get_width()
         height = textureSurface.get_height()
+        logging.info(f"Loaded texture with width: {width}, height: {height}")
         textureData = pygame.image.tostring(textureSurface, "RGBA", True)
         texture = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, texture)
@@ -184,8 +191,9 @@ class Simulation:
         return trans_diff
 
         pass
-    def unit_conversion(self, value, unit_from, unit_to):
-        
+    def mm_conversion(self, value):
+        return value * self.actual_tag_size/self.tag_size_inner
+
     def run(self):
         while True:
             for event in pygame.event.get():
@@ -235,6 +243,7 @@ class Simulation:
                 glBindTexture(GL_TEXTURE_2D, tag["texture"])
                 # Render textured quad with size based on tag_size
                 size = (self.tag_size_outer) / 2
+                logging.debug(f"Tag size (outer/2): {size}")
                 glBegin(GL_QUADS)
                 glTexCoord2f(0, 0); glVertex3f(-size, -size, 0)
                 glTexCoord2f(1, 0); glVertex3f(size, -size, 0)
@@ -320,7 +329,13 @@ class Simulation:
                 os.system('cls' if os.name == 'nt' else 'clear')
 
                 # Print the translation and rotation differences in a nice format
-                print(colored(f"Translation Difference: {translation_diff:.4f}", 'cyan'))
+                est_translation_mm = self.mm_conversion(np.linalg.norm(translation_vector))
+                gt_translation_mm = self.mm_conversion(np.linalg.norm(gt_translation_vector))
+                translation_diff_mm = self.mm_conversion(translation_diff)
+
+                print(colored(f"Estimated Translation Vector Distance (mm): {est_translation_mm:.4f}", 'green'))
+                print(colored(f"Ground Truth Translation Vector Distance (mm): {gt_translation_mm:.4f}", 'yellow'))
+                print(colored(f"Translation Difference (mm): {translation_diff_mm:.4f}", 'cyan'))
                 print(colored(f"Rotation Difference: {rotation_diff:.4f}", 'magenta'))
                 self.slam.vis_slam(ground_truth=ground_truth_pose)
 
