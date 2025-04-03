@@ -5,6 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
+from time import sleep
 
 # TODO: Add flexibility with the world tag
 
@@ -28,9 +29,9 @@ class SLAM:
         self.visible_tags = []
         self.coordinate_id = -1
         plt.ion()  # Turn on interactive mode
-        self.fig_vis = plt.figure()
-        self.fig_graph = plt.figure()
-        self.err_graph = plt.figure()
+        self.fig_vis = plt.figure("3D Visualization")
+        self.fig_graph = plt.figure("SLAM Graph")
+        self.err_graph = plt.figure("Error Graph")
         self.ax_vis = self.fig_vis.add_subplot(111, projection='3d')
         self.ax_graph = self.fig_graph.add_subplot(111)
         self.ax_err = self.err_graph.add_subplot(111)
@@ -75,14 +76,13 @@ class SLAM:
             self.graph[self.coordinate_id] = Node(self.invert(T), np.eye(4), self.coordinate_id)
             self.update_world() #This updates all transformations for the new world coordinate
         else:
-            reference = min(self.visible_tags)
+            reference = min(self.visible_tags) #This might be the issue 
             if(reference == self.coordinate_id):
-                self.graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), self.coordinate_id)
+                self.graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), self.coordinate_id) 
             elif(detection['id'] in self.graph and self.graph[detection['id']].reference == self.coordinate_id):
                 node = self.graph[detection['id']]
                 self.graph[detection['id']] = Node(self.invert(T), node.world, self.coordinate_id, weight=node.weight, updated=False)
             elif(reference != detection['id'] and reference in self.graph):
-                print(f"Reference: {reference}, Detection: {detection['id']}")
                 world,weight,new_reference = self.find_world(reference,T)
                 self.graph[detection['id']] = Node(self.invert(T), world, new_reference, weight, updated=self.graph[reference].updated)
             else:
@@ -155,7 +155,7 @@ class SLAM:
         return T_avg
     
     def get_world(self,reference,T):
-        return np.matmul(T,self.graph[reference].local)
+        return np.matmul(T,self.graph[reference].local) #this is the issue, as the reference local is wrong
     def update_world(self):
         print("No world update")
         # TODO: Implement the update_world method

@@ -10,9 +10,19 @@ from apriltag import apriltag
 from slam import SLAM
 import csv
 import time
+import logging
+import os
+from termcolor import colored
 
 #TODO: Add covarince matrix to the graph
 #TODO: Rendering priority based on distance
+#TODO: Implement unit conversion 
+
+logging.basicConfig(
+    filename='last_run.log',  # name of the file
+    level=logging.INFO,          # level of messages to capture
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 class Simulation:
     def __init__(self, settings_file):
         self.load_settings(settings_file)
@@ -144,7 +154,7 @@ class Simulation:
                        [0, np.sin(rotation[0]), np.cos(rotation[0])]])
         
         # Combined rotation matrix (rotation order: ZYX)
-        rotation_matrix = rz @ ry @ rx
+        rotation_matrix = rx @ ry @ rz
 
         # Flip axes to match the coordinate system
         flip_x = np.array([[1, 0, 0],
@@ -167,7 +177,6 @@ class Simulation:
         return transformation_matrix
 
     def ground_truth_difference(self, tag1_id, tag2_id):
-        #FIXME: This function is not working and it raises important questions
         tag1 = self.tags_data[tag1_id]
         tag2 = self.tags_data[tag2_id]
         trans_diff = np.linalg.norm((tag1["position"]-self.camera_position) - (tag2["position"]-self.camera_position))
@@ -175,6 +184,8 @@ class Simulation:
         return trans_diff
 
         pass
+    def unit_conversion(self, value, unit_from, unit_to):
+        
     def run(self):
         while True:
             for event in pygame.event.get():
@@ -255,16 +266,18 @@ class Simulation:
             if pose is not None:
                 translation_vector = pose[:3, 3]
                 rotation_matrix = pose[:3, :3]
-                print("Estimated Translation Vector:", translation_vector)
-                print("Estimated Rotation Matrix:\n", rotation_matrix)
+                logging.info("Estimated Translation Vector: %s", translation_vector)
+                logging.info("Estimated Rotation Matrix:\n%s", rotation_matrix)
 
                 ground_truth_tags = [{} for _ in range(len(self.slam.graph))]
                 for tag_id, node in self.slam.graph.items():
+                    # Calculate the ground truth translation distance
                     true_pose = self.ground_truth(tag_id)
                     translation_dist = np.linalg.norm(true_pose[:3, 3])
                     ground_truth_tags[tag_id]["local"] = translation_dist
 
                     #tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
+                    #FIXME: The ground truth potentially has issues
                     tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
                     ground_truth_tags[tag_id]["world"] = tag_to_world
 
@@ -288,23 +301,27 @@ class Simulation:
                         diff_local,
                     ])
                 
-
-
-                
                 self.slam.error_graph(ground_truth_tags)
 
                 # Compare with ground truth
                 ground_truth_pose = self.ground_truth()
                 gt_translation_vector = ground_truth_pose[:3, 3]
                 gt_rotation_matrix = ground_truth_pose[:3, :3]
-                print("Ground Truth Translation Vector:", gt_translation_vector)
-                print("Ground Truth Rotation Matrix:\n", gt_rotation_matrix)
+                logging.info("Ground Truth Translation Vector: %s", gt_translation_vector)
+                logging.info("Ground Truth Rotation Matrix:\n%s", gt_rotation_matrix)
 
                 # Calculate differences
                 translation_diff = np.linalg.norm(translation_vector - gt_translation_vector)
                 rotation_diff = np.linalg.norm(rotation_matrix - gt_rotation_matrix)
-                print("Translation Difference:", translation_diff)
-                print("Rotation Difference:", rotation_diff)
+                logging.info("Translation Difference: %s", translation_diff)
+                logging.info("Rotation Difference: %s", rotation_diff)
+
+                # Clear the terminal
+                os.system('cls' if os.name == 'nt' else 'clear')
+
+                # Print the translation and rotation differences in a nice format
+                print(colored(f"Translation Difference: {translation_diff:.4f}", 'cyan'))
+                print(colored(f"Rotation Difference: {rotation_diff:.4f}", 'magenta'))
                 self.slam.vis_slam(ground_truth=ground_truth_pose)
 
                 current_time = time.time() - self.start_time
