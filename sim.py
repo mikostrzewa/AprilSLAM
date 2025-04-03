@@ -15,8 +15,6 @@ import os
 from termcolor import colored
 
 #TODO: Add covarince matrix to the graph
-#TODO: Rendering priority based on distance
-#TODO: Implement unit conversion 
 
 logging.basicConfig(
     filename='last_run.log',  # name of the file
@@ -132,7 +130,7 @@ class Simulation:
                                   [0, 0, 1]])
         dist_coeffs = np.zeros((4, 1))  # Assuming no lens distortion
         camera_params = {'camera_matrix': camera_matrix, 'dist_coeffs': dist_coeffs}
-        self.slam = SLAM(camera_params, tag_size=self.tag_size_inner)
+        self.slam = SLAM(logging, camera_params, tag_size=self.tag_size_inner)
 
     def ground_truth(self,tag_id=0):
 
@@ -160,8 +158,8 @@ class Simulation:
                        [0, np.cos(rotation[0]), -np.sin(rotation[0])],
                        [0, np.sin(rotation[0]), np.cos(rotation[0])]])
         
-        # Combined rotation matrix (rotation order: ZYX)
-        rotation_matrix = rx @ ry @ rz
+        # Combined rotation matrix (rotation order: XYZ)
+        rotation_matrix = rz @ ry @ rx
 
         # Flip axes to match the coordinate system
         flip_x = np.array([[1, 0, 0],
@@ -285,9 +283,10 @@ class Simulation:
                     translation_dist = np.linalg.norm(true_pose[:3, 3])
                     ground_truth_tags[tag_id]["local"] = translation_dist
 
-                    #tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
+                    tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
                     #FIXME: The ground truth potentially has issues
-                    tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
+                    #tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
+                    logging.info(f"Tag ID: {tag_id}, Tag to World GT Distance: {tag_to_world}")
                     ground_truth_tags[tag_id]["world"] = tag_to_world
 
                     diff_world = abs(np.linalg.norm(node.world[:3, 3]) - tag_to_world)
@@ -329,14 +328,32 @@ class Simulation:
                 os.system('cls' if os.name == 'nt' else 'clear')
 
                 # Print the translation and rotation differences in a nice format
+                def scale_units(value_mm):
+                    if value_mm >= 1000:
+                        return value_mm / 1000, 'm'
+                    elif value_mm >= 10:
+                        return value_mm / 10, 'cm'
+                    else:
+                        return value_mm, 'mm'
+
                 est_translation_mm = self.mm_conversion(np.linalg.norm(translation_vector))
                 gt_translation_mm = self.mm_conversion(np.linalg.norm(gt_translation_vector))
                 translation_diff_mm = self.mm_conversion(translation_diff)
+                # Calculate and print percentage difference
+                if gt_translation_mm != 0:
+                    translation_percentage_diff = (translation_diff_mm / gt_translation_mm) * 100
+                else:
+                    translation_percentage_diff = 0
 
-                print(colored(f"Estimated Translation Vector Distance (mm): {est_translation_mm:.4f}", 'green'))
-                print(colored(f"Ground Truth Translation Vector Distance (mm): {gt_translation_mm:.4f}", 'yellow'))
-                print(colored(f"Translation Difference (mm): {translation_diff_mm:.4f}", 'cyan'))
+                est_translation_scaled, est_unit = scale_units(est_translation_mm)
+                gt_translation_scaled, gt_unit = scale_units(gt_translation_mm)
+                translation_diff_scaled, diff_unit = scale_units(translation_diff_mm)
+
+                print(colored(f"Estimated Translation Vector Distance: {est_translation_scaled:.4f} {est_unit}", 'green'))
+                print(colored(f"Ground Truth Translation Vector Distance: {gt_translation_scaled:.4f} {gt_unit}", 'yellow'))
+                print(colored(f"Translation Difference: {translation_diff_scaled:.4f} {diff_unit}", 'cyan'))
                 print(colored(f"Rotation Difference: {rotation_diff:.4f}", 'magenta'))
+                print(colored(f"Translation Percentage Difference: {translation_percentage_diff:.2f}%", 'red'))
                 self.slam.vis_slam(ground_truth=ground_truth_pose)
 
                 current_time = time.time() - self.start_time
@@ -352,7 +369,6 @@ class Simulation:
                 gt_angles = self.rotation_matrix_to_euler_angles(gt_rotation_matrix)
 
                 # Write data to CSV
-                
                 self.csvwriter.writerow([
                     current_time,len(self.slam.graph),self.slam.average_distance_to_nodes(),
                     translation_vector[0], translation_vector[1], translation_vector[2],
@@ -360,7 +376,6 @@ class Simulation:
                     gt_translation_vector[0], gt_translation_vector[1], gt_translation_vector[2],
                     gt_angles[0], gt_angles[1], gt_angles[2],translation_diff,rotation_diff
                 ])
-                
 
             self.slam.slam_graph()
             

@@ -20,7 +20,9 @@ class Node:
 
 
 class SLAM:
-    def __init__(self, camera_params, tag_type="tagStandard41h12", tag_size=0.06):
+    def __init__(self,logger, camera_params, tag_type="tagStandard41h12", tag_size=0.06):
+        self.logger = logger
+        self.logger.info("Initializing SLAM")
         self.detector = apriltag(tag_type)
         self.tag_size = tag_size
         self.camera_matrix = camera_params['camera_matrix']
@@ -67,7 +69,6 @@ class SLAM:
         # Estimate the pose of the tag
         retval, rvec, tvec = cv2.solvePnP(obj_points, corners, self.camera_matrix, self.dist_coeffs)
         T = self.transformation(rvec, tvec)
-
         if self.coordinate_id == -1 or self.coordinate_id == detection['id']:
             self.coordinate_id = detection['id']
             self.graph[self.coordinate_id] = Node(self.invert(T), np.eye(4), self.coordinate_id)
@@ -78,8 +79,11 @@ class SLAM:
         else:
             reference = min(self.visible_tags) #This might be the issue 
             if(reference == self.coordinate_id):
-                self.graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), self.coordinate_id) 
+                # If the reference is is visibale
+                self.graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), self.coordinate_id) # Let's assume this is correct for now
             elif(detection['id'] in self.graph and self.graph[detection['id']].reference == self.coordinate_id):
+                # If the detection is already in the graph and its reference is the coordinate_id
+                self.logger.info(f"World not updated! Detection ID: {detection['id']}, Node World: {self.graph[detection['id']].world}")
                 node = self.graph[detection['id']]
                 self.graph[detection['id']] = Node(self.invert(T), node.world, self.coordinate_id, weight=node.weight, updated=False)
             elif(reference != detection['id'] and reference in self.graph):
