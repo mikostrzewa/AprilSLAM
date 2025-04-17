@@ -80,7 +80,12 @@ class SLAM:
             reference = min(self.visible_tags) #This might be the issue 
             if(reference == self.coordinate_id):
                 # If the reference is is visibale
-                self.graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), self.coordinate_id) # Let's assume this is correct for now
+                self.graph[detection['id']] = Node(self.invert(T), self.get_world(reference,T), self.coordinate_id)
+                # Log the result of get_world's translational vector length
+                world_transform = self.get_world(reference, T)
+                translation_vector = world_transform[:3, 3]
+                vector_length = np.linalg.norm(translation_vector)
+                self.logger.info(f"Tag ID {detection['id']} (reference: {reference}): World transform translation length = {vector_length}")
             elif(detection['id'] in self.graph and self.graph[detection['id']].reference == self.coordinate_id):
                 # If the detection is already in the graph and its reference is the coordinate_id
                 self.logger.info(f"World not updated! Detection ID: {detection['id']}, Node World: {self.graph[detection['id']].world}")
@@ -129,8 +134,8 @@ class SLAM:
         distance_tvec = self.distance(tvec)
         text = f'ID: {tag_id}, Dist: {distance_tvec:.1f} units'
         text2 = f'Yaw: {yaw:.1f}, Pitch: {pitch:.1f}, Roll: {roll:.1f}'
-        cv2.putText(image, text, (pt1[0], pt1[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-        cv2.putText(image, text2, (pt1[0], pt1[1] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+        cv2.putText(image, text, (pt1[0], pt1[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 165, 255), 2)
+        cv2.putText(image, text2, (pt1[0], pt1[1] - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 165, 255), 2)
         cv2.drawFrameAxes(image, self.camera_matrix, self.dist_coeffs, rvec, tvec, 2)
         return image
     
@@ -159,7 +164,7 @@ class SLAM:
         return T_avg
     
     def get_world(self,reference,T):
-        return np.matmul(T,self.graph[reference].local) #this is the issue, as the reference local is wrong
+        return T @ self.graph[reference].local 
     def update_world(self):
         print("No world update")
         # TODO: Implement the update_world method

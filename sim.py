@@ -86,7 +86,6 @@ class Simulation:
         self.actual_tag_size = self.settings["actual_size_in_mm"]
         self.tags = self.settings["tags"]
 
-
     def init_pygame(self):
         pygame.init()
         self.display = (self.display_width, self.display_height)
@@ -132,7 +131,8 @@ class Simulation:
         camera_params = {'camera_matrix': camera_matrix, 'dist_coeffs': dist_coeffs}
         self.slam = SLAM(logging, camera_params, tag_size=self.tag_size_inner)
 
-    def ground_truth(self,tag_id=0):
+    def world_ground_truth(self, tag_id=0):
+        Tw = self.ground_truth(self.slam.coordinate_id)
 
         tag = self.tags_data[tag_id]
         
@@ -147,17 +147,60 @@ class Simulation:
         
         # Create rotation matrix from Euler angles (using the ZYX convention)
         rz = np.array([[np.cos(rotation[2]), -np.sin(rotation[2]), 0],
-                       [np.sin(rotation[2]), np.cos(rotation[2]), 0],
-                       [0, 0, 1]])
+                   [np.sin(rotation[2]), np.cos(rotation[2]), 0],
+                   [0, 0, 1]])
         
         ry = np.array([[np.cos(rotation[1]), 0, np.sin(rotation[1])],
-                       [0, 1, 0],
-                       [-np.sin(rotation[1]), 0, np.cos(rotation[1])]])
+                   [0, 1, 0],
+                   [-np.sin(rotation[1]), 0, np.cos(rotation[1])]])
         
         rx = np.array([[1, 0, 0],
-                       [0, np.cos(rotation[0]), -np.sin(rotation[0])],
-                       [0, np.sin(rotation[0]), np.cos(rotation[0])]])
+                   [0, np.cos(rotation[0]), -np.sin(rotation[0])],
+                   [0, np.sin(rotation[0]), np.cos(rotation[0])]])
+        # Combined rotation matrix (rotation order: XYZ)
+        rotation_matrix = rz @ ry @ rx
+
+        # Flip axes to match the coordinate system
+        flip_x = np.array([[1, 0, 0],
+                           [0, -1, 0],
+                           [0, 0, -1]])
         
+        rotation_matrix = flip_x @ rotation_matrix
+        transformation_matrix = np.eye(4)
+        transformation_matrix[:3, :3] = rotation_matrix
+        transformation_matrix[:3, 3] = position
+
+        return transformation_matrix @ Tw
+
+
+
+    def ground_truth(self,tag_id=0):
+        tag = self.tags_data[tag_id]
+    
+
+        tag = self.tags_data[tag_id]
+        
+        # Adjust tag position by subtracting camera position
+        position = tag["position"] - self.camera_position
+
+        # Flip y and z axes (OpenGL coordinate system adjustment)
+        position[1:] = -position[1:]  # Flip y and z axes
+        
+        # Extract rotation
+        rotation = np.radians(tag["rotation"])
+        
+        # Create rotation matrix from Euler angles (using the ZYX convention)
+        rz = np.array([[np.cos(rotation[2]), -np.sin(rotation[2]), 0],
+                   [np.sin(rotation[2]), np.cos(rotation[2]), 0],
+                   [0, 0, 1]])
+        
+        ry = np.array([[np.cos(rotation[1]), 0, np.sin(rotation[1])],
+                   [0, 1, 0],
+                   [-np.sin(rotation[1]), 0, np.cos(rotation[1])]])
+        
+        rx = np.array([[1, 0, 0],
+                   [0, np.cos(rotation[0]), -np.sin(rotation[0])],
+                   [0, np.sin(rotation[0]), np.cos(rotation[0])]])
         # Combined rotation matrix (rotation order: XYZ)
         rotation_matrix = rz @ ry @ rx
 
@@ -283,10 +326,28 @@ class Simulation:
                     translation_dist = np.linalg.norm(true_pose[:3, 3])
                     ground_truth_tags[tag_id]["local"] = translation_dist
 
-                    tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
+                    tag_to_world2 = self.ground_truth_difference(tag1_id=tag_id, tag2_id=self.slam.coordinate_id)
                     #FIXME: The ground truth potentially has issues
                     #tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
+                    tag_to_world = np.linalg.norm(self.world_ground_truth(tag_id)[:3, 3])
+                    # Calculate and log the difference between the two ground truth methods
+                    diff_gt_methods = round(abs(tag_to_world2 - tag_to_world), 2)
+                    logging.info(f"Difference between GT methods for tag {tag_id}: {diff_gt_methods}")
                     logging.info(f"Tag ID: {tag_id}, Tag to World GT Distance: {tag_to_world}")
+                    # Log the ground truth distance, node.local distance, and their difference
+                    local_dist = np.linalg.norm(node.local[:3, 3])
+                    logging.info(f"Tag ID: {tag_id}, Ground Truth Local Distance: {translation_dist}")
+                    logging.info(f"Tag ID: {tag_id}, Node Local Distance: {local_dist}")
+                    logging.info(f"Tag ID: {tag_id}, Local Distance Difference: {abs(local_dist - translation_dist)}")
+                    # Log both ground truth and local transformation matrices side by side
+                    ground_truth_matrix = self.ground_truth(tag_id)
+                    local_matrix = node.local
+                    
+                    logging.info(f"Tag ID: {tag_id}, Ground Truth Matrix vs Local Matrix:")
+                    for i in range(4):
+                        gt_row = ' '.join([f"{val:8.4f}" for val in ground_truth_matrix[i]])
+                        local_row = ' '.join([f"{val:8.4f}" for val in local_matrix[i]])
+                        logging.info(f"GT: [{gt_row}]    Local: [{local_row}]")
                     ground_truth_tags[tag_id]["world"] = tag_to_world
 
                     diff_world = abs(np.linalg.norm(node.world[:3, 3]) - tag_to_world)
@@ -323,6 +384,7 @@ class Simulation:
                 rotation_diff = np.linalg.norm(rotation_matrix - gt_rotation_matrix)
                 logging.info("Translation Difference: %s", translation_diff)
                 logging.info("Rotation Difference: %s", rotation_diff)
+                
 
                 # Clear the terminal
                 os.system('cls' if os.name == 'nt' else 'clear')
@@ -357,7 +419,7 @@ class Simulation:
                 self.slam.vis_slam(ground_truth=ground_truth_pose)
 
                 current_time = time.time() - self.start_time
-                 # Estimated pose
+                # Estimated pose
                 translation_vector = pose[:3, 3]
                 rotation_matrix = pose[:3, :3]
                 est_angles = self.rotation_matrix_to_euler_angles(rotation_matrix)

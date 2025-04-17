@@ -7,6 +7,7 @@
     "size_scale": 2,
     "tag_size_inner": 5,
     "tag_size_outer": 9,
+    "actual_size_in_mm": 55.6,
     "tags": [
         {
             "id": 0,
