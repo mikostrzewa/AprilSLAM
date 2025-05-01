@@ -40,6 +40,12 @@ class Simulation:
         self.error_file = open('error_params.csv', 'w', newline='')
         self.csvwriter = csv.writer(self.csvfile)
         self.csvwriter_errors = csv.writer(self.error_file)
+        self.csvfile = open('error_data.csv', 'w', newline='')
+        self.error_file = open('error_params.csv', 'w', newline='')
+        self.csvwriter = csv.writer(self.csvfile)
+        self.csvwriter_errors = csv.writer(self.error_file)
+        self.covariance_file = open('covariance_data.csv', 'w', newline='')
+        self.csvwriter_covariance = csv.writer(self.covariance_file)
         # Write the header
         self.csvwriter.writerow([
             'Time','Number of Nodes',"Avrg Distance",
@@ -55,7 +61,16 @@ class Simulation:
             'Est_Roll_Local', 'Est_Pitch_Local', 'Est_Yaw_Local',
             'Est_X_World', 'Est_Y_World', 'Est_Z_World',
             'Est_Roll_World', 'Est_Pitch_World', 'Est_Yaw_World',
+            'Tag_Est_X', 'Tag_Est_Y', 'Tag_Est_Z',
+            'Tag_Est_Roll', 'Tag_Est_Pitch', 'Tag_Est_Yaw',
             'Error_World', 'Error_Local',
+        ])
+
+        self.csvwriter_covariance.writerow([
+            'Number of Jumps',
+            'Tag_Est_X', 'Tag_Est_Y', 'Tag_Est_Z',
+            'Tag_Est_Roll', 'Tag_Est_Pitch', 'Tag_Est_Yaw',
+            'Translation_Error',
         ])
     def rotation_matrix_to_euler_angles(self,R):
         sy = np.sqrt(R[0, 0] * R[0, 0] + R[1, 0] * R[1, 0])
@@ -172,8 +187,6 @@ class Simulation:
 
         return transformation_matrix @ Tw
 
-
-
     def ground_truth(self,tag_id=0):
         tag = self.tags_data[tag_id]
     
@@ -231,12 +244,13 @@ class Simulation:
 
         return trans_diff
 
-        pass
     def mm_conversion(self, value):
         return value * self.actual_tag_size/self.tag_size_inner
 
     def run(self):
         while True:
+            # Clear the terminal
+            os.system('cls' if os.name == 'nt' else 'clear')
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -247,7 +261,7 @@ class Simulation:
                 elif event.type == pygame.KEYUP:
                     if event.key in self.key_state:
                         self.key_state[event.key] = False
-
+            
             if self.key_state[pygame.K_LEFT]:
                 self.camera_position[0] -= self.movement_speed
             if self.key_state[pygame.K_RIGHT]:
@@ -326,14 +340,15 @@ class Simulation:
                     translation_dist = np.linalg.norm(true_pose[:3, 3])
                     ground_truth_tags[tag_id]["local"] = translation_dist
 
-                    tag_to_world2 = self.ground_truth_difference(tag1_id=tag_id, tag2_id=self.slam.coordinate_id)
-                    #FIXME: The ground truth potentially has issues
                     #tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
-                    tag_to_world = np.linalg.norm(self.world_ground_truth(tag_id)[:3, 3])
+                    #tag_to_world = np.linalg.norm(self.world_ground_truth(tag_id)[:3, 3])
+                    tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
+                    print(f"Tag ID: {tag_id}, Tag to World Ground Truth: {tag_to_world}")
+                    print(f"Tag ID: {tag_id}, Tag to World Distance: {np.linalg.norm(node.world[:3, 3])}")
                     # Calculate and log the difference between the two ground truth methods
-                    diff_gt_methods = round(abs(tag_to_world2 - tag_to_world), 2)
-                    logging.info(f"Difference between GT methods for tag {tag_id}: {diff_gt_methods}")
                     logging.info(f"Tag ID: {tag_id}, Tag to World GT Distance: {tag_to_world}")
+                    logging.info(f"Tag ID: {tag_id}, Tag to World Distance: {np.linalg.norm(node.world[:3, 3])}")
+
                     # Log the ground truth distance, node.local distance, and their difference
                     local_dist = np.linalg.norm(node.local[:3, 3])
                     logging.info(f"Tag ID: {tag_id}, Ground Truth Local Distance: {translation_dist}")
@@ -351,6 +366,7 @@ class Simulation:
                     ground_truth_tags[tag_id]["world"] = tag_to_world
 
                     diff_world = abs(np.linalg.norm(node.world[:3, 3]) - tag_to_world)
+                    logging.info(f"Tag ID: {tag_id}, World Distance Difference: {diff_world}")
 
                     diff_local = abs(np.linalg.norm(node.local[:3, 3]) - translation_dist)
                     
@@ -359,6 +375,19 @@ class Simulation:
 
                     translation_world = node.world[:3, 3]
                     angles_world = self.rotation_matrix_to_euler_angles(node.world[:3, :3])
+                    if(node.visible):
+                        tag_pos = np.matmul(node.local,node.world) 
+                        tag_translation = tag_pos[:3, 3]
+                        tag_rotation = tag_pos[:3, :3]
+                        tag_angles = self.rotation_matrix_to_euler_angles(tag_rotation)
+                        tag_error = np.linalg.norm(self.ground_truth(self.slam.coordinate_id)[:3, 3] - tag_pos[:3, 3])
+
+                        self.csvwriter_covariance.writerow([
+                            node.weight,  # Replace with actual number of jumps if available
+                            *tag_translation,
+                            *tag_angles,
+                            tag_error,
+                        ])
 
                     self.csvwriter_errors.writerow([
                         node.weight,  # Replace with actual number of jumps if available
@@ -366,11 +395,16 @@ class Simulation:
                         *angles_local,
                         *translation_world,
                         *angles_world,
+                        *tag_translation,
+                        *tag_rotation,
                         diff_world,
                         diff_local,
+                        tag_error,
                     ])
                 
                 self.slam.error_graph(ground_truth_tags)
+
+
 
                 # Compare with ground truth
                 ground_truth_pose = self.ground_truth()
@@ -386,8 +420,7 @@ class Simulation:
                 logging.info("Rotation Difference: %s", rotation_diff)
                 
 
-                # Clear the terminal
-                os.system('cls' if os.name == 'nt' else 'clear')
+                
 
                 # Print the translation and rotation differences in a nice format
                 def scale_units(value_mm):

@@ -164,7 +164,7 @@ class SLAM:
         return T_avg
     
     def get_world(self,reference,T):
-        return T @ self.graph[reference].local 
+        return self.graph[reference].local @ T
     def update_world(self):
         print("No world update")
         # TODO: Implement the update_world method
