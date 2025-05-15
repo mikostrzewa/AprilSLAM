@@ -101,7 +101,7 @@ class SLAM:
         return retval, rvec, tvec
     
     def find_world(self, reference, T):
-        world = np.matmul(self.get_world(reference,T),self.graph[reference].world)
+        world = np.matmul(self.graph[reference].world,self.get_world(reference,T))
         weight = self.graph[reference].weight+1
         new_reference = self.graph[reference].reference
         return world,weight,new_reference
@@ -151,7 +151,7 @@ class SLAM:
         for tag_id in self.visible_tags:
             node = self.graph.get(tag_id)
             node.visible = True
-            T = np.matmul(node.local, node.world)
+            T = np.matmul(node.world, node.local)
             if T is not None:
                 T_sum += T/node.weight
                 count += 1/node.weight

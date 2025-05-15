@@ -22,7 +22,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 class Simulation:
-    def __init__(self, settings_file):
+    def __init__(self, settings_file, movment_flag = True):
         # Clear the log file at the start of the simulation
         if os.path.exists('last_run.log'):
             open('last_run.log', 'w').close()
@@ -33,6 +33,7 @@ class Simulation:
         self.init_opengl()
         self.init_slam()
         self.camera_position = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        self.movement_flag = movment_flag
         self.movement_speed = 1 * self.size_scale
         self.key_state = {pygame.K_LEFT: False, pygame.K_RIGHT: False, pygame.K_UP: False, pygame.K_DOWN: False, pygame.K_w: False, pygame.K_s: False}
         self.start_time = time.time()
@@ -247,10 +248,13 @@ class Simulation:
     def mm_conversion(self, value):
         return value * self.actual_tag_size/self.tag_size_inner
 
+    def monte_carlo_position_randomizer(self, bounds):
+        x_min, x_max, y_min, y_max, z_min, z_max = bounds
+        self.camera_position[0] = np.random.uniform(x_min, x_max)
+        self.camera_position[1] = np.random.uniform(y_min, y_max)
+        self.camera_position[2] = np.random.uniform(z_min, z_max)
     def run(self):
         while True:
-            # Clear the terminal
-            os.system('cls' if os.name == 'nt' else 'clear')
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -261,19 +265,26 @@ class Simulation:
                 elif event.type == pygame.KEYUP:
                     if event.key in self.key_state:
                         self.key_state[event.key] = False
-            
-            if self.key_state[pygame.K_LEFT]:
-                self.camera_position[0] -= self.movement_speed
-            if self.key_state[pygame.K_RIGHT]:
-                self.camera_position[0] += self.movement_speed
-            if self.key_state[pygame.K_UP]:
-                self.camera_position[1] += self.movement_speed
-            if self.key_state[pygame.K_DOWN]:
-                self.camera_position[1] -= self.movement_speed
-            if self.key_state[pygame.K_w]:
-                self.camera_position[2] -= self.movement_speed
-            if self.key_state[pygame.K_s]:
-                self.camera_position[2] += self.movement_speed
+
+                    
+            if self.movement_flag:
+                if self.key_state[pygame.K_LEFT]:
+                    self.camera_position[0] -= self.movement_speed
+                if self.key_state[pygame.K_RIGHT]:
+                    self.camera_position[0] += self.movement_speed
+                if self.key_state[pygame.K_UP]:
+                    self.camera_position[1] += self.movement_speed
+                if self.key_state[pygame.K_DOWN]:
+                    self.camera_position[1] -= self.movement_speed
+                if self.key_state[pygame.K_w]:
+                    self.camera_position[2] -= self.movement_speed
+                if self.key_state[pygame.K_s]:
+                    self.camera_position[2] += self.movement_speed
+            else:
+                bounds = np.array([-3, 10, -1, 1, -0.25, 3])*5 #x_min, x_max, y_min, y_max, z_min, z_max
+                self.monte_carlo_position_randomizer(bounds)
+
+
 
             glClearColor(0.5, 0.0, 0.5, 1.0)  # Clear to purple background
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -327,6 +338,10 @@ class Simulation:
             cv2.imshow('AprilTag Detection', image)
 
             pose = self.slam.my_pose()
+            # Compare with ground truth
+            ground_truth_pose = self.ground_truth()
+            gt_translation_vector = ground_truth_pose[:3, 3]
+            gt_rotation_matrix = ground_truth_pose[:3, :3]
             if pose is not None:
                 translation_vector = pose[:3, 3]
                 rotation_matrix = pose[:3, :3]
@@ -334,82 +349,79 @@ class Simulation:
                 logging.info("Estimated Rotation Matrix:\n%s", rotation_matrix)
 
                 ground_truth_tags = [{} for _ in range(len(self.slam.graph))]
-                for tag_id, node in self.slam.graph.items():
-                    # Calculate the ground truth translation distance
-                    true_pose = self.ground_truth(tag_id)
-                    translation_dist = np.linalg.norm(true_pose[:3, 3])
-                    ground_truth_tags[tag_id]["local"] = translation_dist
+                try:
+                    for tag_id, node in self.slam.graph.items():
+                        # Calculate the ground truth translation distance
+                        true_pose = self.ground_truth(tag_id)
+                        translation_dist = np.linalg.norm(true_pose[:3, 3])
+                        ground_truth_tags[tag_id]["local"] = translation_dist
 
-                    #tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
-                    #tag_to_world = np.linalg.norm(self.world_ground_truth(tag_id)[:3, 3])
-                    tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
-                    print(f"Tag ID: {tag_id}, Tag to World Ground Truth: {tag_to_world}")
-                    print(f"Tag ID: {tag_id}, Tag to World Distance: {np.linalg.norm(node.world[:3, 3])}")
-                    # Calculate and log the difference between the two ground truth methods
-                    logging.info(f"Tag ID: {tag_id}, Tag to World GT Distance: {tag_to_world}")
-                    logging.info(f"Tag ID: {tag_id}, Tag to World Distance: {np.linalg.norm(node.world[:3, 3])}")
+                        #tag_to_world = np.linalg.norm(self.ground_truth(tag_id)[:3, 3] - self.ground_truth(self.slam.coordinate_id)[:3, 3])
+                        #tag_to_world = np.linalg.norm(self.world_ground_truth(tag_id)[:3, 3])
+                        tag_to_world = self.ground_truth_difference(tag_id, self.slam.coordinate_id)
+                        # Calculate and log the difference between the two ground truth methods
+                        logging.info(f"Tag ID: {tag_id}, Tag to World GT Distance: {tag_to_world}")
+                        logging.info(f"Tag ID: {tag_id}, Tag to World Distance: {np.linalg.norm(node.world[:3, 3])}")
 
-                    # Log the ground truth distance, node.local distance, and their difference
-                    local_dist = np.linalg.norm(node.local[:3, 3])
-                    logging.info(f"Tag ID: {tag_id}, Ground Truth Local Distance: {translation_dist}")
-                    logging.info(f"Tag ID: {tag_id}, Node Local Distance: {local_dist}")
-                    logging.info(f"Tag ID: {tag_id}, Local Distance Difference: {abs(local_dist - translation_dist)}")
-                    # Log both ground truth and local transformation matrices side by side
-                    ground_truth_matrix = self.ground_truth(tag_id)
-                    local_matrix = node.local
-                    
-                    logging.info(f"Tag ID: {tag_id}, Ground Truth Matrix vs Local Matrix:")
-                    for i in range(4):
-                        gt_row = ' '.join([f"{val:8.4f}" for val in ground_truth_matrix[i]])
-                        local_row = ' '.join([f"{val:8.4f}" for val in local_matrix[i]])
-                        logging.info(f"GT: [{gt_row}]    Local: [{local_row}]")
-                    ground_truth_tags[tag_id]["world"] = tag_to_world
+                        # Log the ground truth distance, node.local distance, and their difference
+                        local_dist = np.linalg.norm(node.local[:3, 3])
+                        logging.info(f"Tag ID: {tag_id}, Ground Truth Local Distance: {translation_dist}")
+                        logging.info(f"Tag ID: {tag_id}, Node Local Distance: {local_dist}")
+                        logging.info(f"Tag ID: {tag_id}, Local Distance Difference: {abs(local_dist - translation_dist)}")
+                        # Log both ground truth and local transformation matrices side by side
+                        ground_truth_matrix = self.ground_truth(tag_id)
+                        local_matrix = node.local
+                        
+                        logging.info(f"Tag ID: {tag_id}, Ground Truth Matrix vs Local Matrix:")
+                        for i in range(4):
+                            gt_row = ' '.join([f"{val:8.4f}" for val in ground_truth_matrix[i]])
+                            local_row = ' '.join([f"{val:8.4f}" for val in local_matrix[i]])
+                            logging.info(f"GT: [{gt_row}]    Local: [{local_row}]")
+                        ground_truth_tags[tag_id]["world"] = tag_to_world
 
-                    diff_world = abs(np.linalg.norm(node.world[:3, 3]) - tag_to_world)
-                    logging.info(f"Tag ID: {tag_id}, World Distance Difference: {diff_world}")
+                        diff_world = abs(np.linalg.norm(node.world[:3, 3]) - tag_to_world)
+                        logging.info(f"Tag ID: {tag_id}, World Distance Difference: {diff_world}")
 
-                    diff_local = abs(np.linalg.norm(node.local[:3, 3]) - translation_dist)
-                    
-                    translation_local = node.local[:3, 3]
-                    angles_local = self.rotation_matrix_to_euler_angles(node.local[:3, :3])
+                        diff_local = abs(np.linalg.norm(node.local[:3, 3]) - translation_dist)
+                        
+                        translation_local = node.local[:3, 3]
+                        angles_local = self.rotation_matrix_to_euler_angles(node.local[:3, :3])
 
-                    translation_world = node.world[:3, 3]
-                    angles_world = self.rotation_matrix_to_euler_angles(node.world[:3, :3])
-                    if(node.visible):
-                        tag_pos = np.matmul(node.local,node.world) 
-                        tag_translation = tag_pos[:3, 3]
-                        tag_rotation = tag_pos[:3, :3]
-                        tag_angles = self.rotation_matrix_to_euler_angles(tag_rotation)
-                        tag_error = np.linalg.norm(self.ground_truth(self.slam.coordinate_id)[:3, 3] - tag_pos[:3, 3])
+                        translation_world = node.world[:3, 3]
+                        angles_world = self.rotation_matrix_to_euler_angles(node.world[:3, :3])
+                        if(node.visible):
+                            tag_translation = true_pose[:3, 3]
+                            tag_rotation = true_pose[:3, :3]
+                            tag_angles = self.rotation_matrix_to_euler_angles(tag_rotation)
+                            translation_error = np.linalg.norm(translation_vector-gt_translation_vector)
 
-                        self.csvwriter_covariance.writerow([
+                            self.csvwriter_covariance.writerow([
+                                node.weight,  # Replace with actual number of jumps if available
+                                *translation_local,
+                                *angles_local,
+                                translation_error,
+                            ])
+
+                        self.csvwriter_errors.writerow([
                             node.weight,  # Replace with actual number of jumps if available
+                            *translation_local,
+                            *angles_local,
+                            *translation_world,
+                            *angles_world,
                             *tag_translation,
-                            *tag_angles,
-                            tag_error,
+                            *tag_rotation,
+                            diff_world,
+                            diff_local,
+                            translation_error,
                         ])
-
-                    self.csvwriter_errors.writerow([
-                        node.weight,  # Replace with actual number of jumps if available
-                        *translation_local,
-                        *angles_local,
-                        *translation_world,
-                        *angles_world,
-                        *tag_translation,
-                        *tag_rotation,
-                        diff_world,
-                        diff_local,
-                        tag_error,
-                    ])
+                except Exception as e:
+                    logging.error(f"Error processing graph nodes: {e}")
+                    logging.debug(f"Graph: {self.slam.graph}")
+                    logging.debug(f"Camera Position: {self.camera_position}")
+                    continue
                 
                 self.slam.error_graph(ground_truth_tags)
 
-
-
-                # Compare with ground truth
-                ground_truth_pose = self.ground_truth()
-                gt_translation_vector = ground_truth_pose[:3, 3]
-                gt_rotation_matrix = ground_truth_pose[:3, :3]
                 logging.info("Ground Truth Translation Vector: %s", gt_translation_vector)
                 logging.info("Ground Truth Rotation Matrix:\n%s", gt_rotation_matrix)
 
@@ -418,9 +430,6 @@ class Simulation:
                 rotation_diff = np.linalg.norm(rotation_matrix - gt_rotation_matrix)
                 logging.info("Translation Difference: %s", translation_diff)
                 logging.info("Rotation Difference: %s", rotation_diff)
-                
-
-                
 
                 # Print the translation and rotation differences in a nice format
                 def scale_units(value_mm):
@@ -444,6 +453,9 @@ class Simulation:
                 gt_translation_scaled, gt_unit = scale_units(gt_translation_mm)
                 translation_diff_scaled, diff_unit = scale_units(translation_diff_mm)
 
+                # Clear the terminal
+                os.system('cls' if os.name == 'nt' else 'clear')
+
                 print(colored(f"Estimated Translation Vector Distance: {est_translation_scaled:.4f} {est_unit}", 'green'))
                 print(colored(f"Ground Truth Translation Vector Distance: {gt_translation_scaled:.4f} {gt_unit}", 'yellow'))
                 print(colored(f"Translation Difference: {translation_diff_scaled:.4f} {diff_unit}", 'cyan'))
@@ -463,6 +475,7 @@ class Simulation:
                 gt_rotation_matrix = ground_truth_pose[:3, :3]
                 gt_angles = self.rotation_matrix_to_euler_angles(gt_rotation_matrix)
 
+
                 # Write data to CSV
                 self.csvwriter.writerow([
                     current_time,len(self.slam.graph),self.slam.average_distance_to_nodes(),
@@ -479,7 +492,7 @@ class Simulation:
 
     
 if __name__ == '__main__':
-    sim = Simulation('sim_settings.json')
+    sim = Simulation('sim_settings.json',movment_flag=False)
     try:
         sim.run()
     except KeyboardInterrupt:
