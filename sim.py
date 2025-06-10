@@ -14,8 +14,6 @@ import logging
 import os
 from termcolor import colored
 
-#TODO: Add covarince matrix to the graph
-
 logging.basicConfig(
     filename='last_run.log',  # name of the file
     level=logging.DEBUG,          # level of messages to capture
@@ -371,9 +369,9 @@ class Simulation:
                 logging.info("Estimated Translation Vector: %s", translation_vector)
                 logging.info("Estimated Rotation Matrix:\n%s", rotation_matrix)
 
-                ground_truth_tags = [{} for _ in range(len(self.slam.graph))]
+                ground_truth_tags = [{} for _ in range(len(self.slam.graph.get_nodes()))]
                 try:
-                    for tag_id, node in self.slam.graph.items():
+                    for tag_id, node in self.slam.graph.get_nodes().items():
                         # Calculate the ground truth translation distance
                         true_pose = self.ground_truth(tag_id)
                         translation_dist = np.linalg.norm(true_pose[:3, 3])
@@ -439,7 +437,7 @@ class Simulation:
                         ])
                 except Exception as e:
                     logging.error(f"Error processing graph nodes: {e}")
-                    logging.debug(f"Graph: {self.slam.graph}")
+                    logging.debug(f"Graph: {self.slam.graph.get_nodes()}")
                     logging.debug(f"Camera Position: {self.camera_position}")
                     continue
                 
@@ -501,7 +499,7 @@ class Simulation:
 
                 # Write data to CSV
                 self.csvwriter.writerow([
-                    current_time,len(self.slam.graph),self.slam.average_distance_to_nodes(),
+                    current_time,len(self.slam.graph.get_nodes()),self.slam.average_distance_to_nodes(),
                     translation_vector[0], translation_vector[1], translation_vector[2],
                     est_angles[0], est_angles[1], est_angles[2],
                     gt_translation_vector[0], gt_translation_vector[1], gt_translation_vector[2],
