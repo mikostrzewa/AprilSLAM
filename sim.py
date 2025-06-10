@@ -33,9 +33,22 @@ class Simulation:
         self.init_opengl()
         self.init_slam()
         self.camera_position = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        self.camera_rotation = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        
         self.movement_flag = movment_flag
         self.movement_speed = 1 * self.size_scale
-        self.key_state = {pygame.K_LEFT: False, pygame.K_RIGHT: False, pygame.K_UP: False, pygame.K_DOWN: False, pygame.K_w: False, pygame.K_s: False}
+        self.rotation_speed = 1.0  # degrees per updateq
+
+        self.key_state = {
+            pygame.K_LEFT: False, pygame.K_RIGHT: False,
+            pygame.K_UP: False,   pygame.K_DOWN: False,
+            pygame.K_w: False,    pygame.K_s: False,
+            # rotation keys
+            pygame.K_a: False,    pygame.K_d: False,  # yaw
+            pygame.K_q: False,    pygame.K_e: False,  # roll
+            pygame.K_r: False,    pygame.K_f: False   # pitch
+        }
+
         self.start_time = time.time()
         self.csvfile = open('error_data.csv', 'w', newline='')
         self.error_file = open('error_params.csv', 'w', newline='')
@@ -268,54 +281,64 @@ class Simulation:
 
                     
             if self.movement_flag:
-                if self.key_state[pygame.K_LEFT]:
-                    self.camera_position[0] -= self.movement_speed
-                if self.key_state[pygame.K_RIGHT]:
-                    self.camera_position[0] += self.movement_speed
-                if self.key_state[pygame.K_UP]:
-                    self.camera_position[1] += self.movement_speed
-                if self.key_state[pygame.K_DOWN]:
-                    self.camera_position[1] -= self.movement_speed
-                if self.key_state[pygame.K_w]:
-                    self.camera_position[2] -= self.movement_speed
-                if self.key_state[pygame.K_s]:
-                    self.camera_position[2] += self.movement_speed
+                if self.key_state[pygame.K_LEFT]:  self.camera_position[0] -= self.movement_speed
+                if self.key_state[pygame.K_RIGHT]: self.camera_position[0] += self.movement_speed
+                if self.key_state[pygame.K_UP]:    self.camera_position[1] += self.movement_speed
+                if self.key_state[pygame.K_DOWN]:  self.camera_position[1] -= self.movement_speed
+                if self.key_state[pygame.K_w]:     self.camera_position[2] -= self.movement_speed
+                if self.key_state[pygame.K_s]:     self.camera_position[2] += self.movement_speed
+
+                # Update camera rotation
+                if self.key_state[pygame.K_a]: self.camera_rotation[1] -= self.rotation_speed  # yaw left
+                if self.key_state[pygame.K_d]: self.camera_rotation[1] += self.rotation_speed  # yaw right
+                if self.key_state[pygame.K_q]: self.camera_rotation[2] -= self.rotation_speed  # roll left
+                if self.key_state[pygame.K_e]: self.camera_rotation[2] += self.rotation_speed  # roll right
+                if self.key_state[pygame.K_r]: self.camera_rotation[0] += self.rotation_speed  # pitch up
+                if self.key_state[pygame.K_f]: self.camera_rotation[0] -= self.rotation_speed  # pitch down
             else:
                 bounds = np.array([-3, 10, -1, 1, -0.25, 3])*5 #x_min, x_max, y_min, y_max, z_min, z_max
                 self.monte_carlo_position_randomizer(bounds)
 
-
-
             glClearColor(0.5, 0.0, 0.5, 1.0)  # Clear to purple background
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+            # --- Apply inverse camera transform (view matrix) ---
+            glLoadIdentity()
+            # roll, pitch, yaw (note inverse order and negative angles)
+            glRotatef(-self.camera_rotation[2], 0, 0, 1)
+            glRotatef(-self.camera_rotation[0], 1, 0, 0)
+            glRotatef(-self.camera_rotation[1], 0, 1, 0)
+            # translation
+            glTranslatef(-self.camera_position[0],
+                         -self.camera_position[1],
+                         -self.camera_position[2])
 
             # Sort tags by z position from lowest to highest
             tags_with_z = []
             for tag in self.tags_data:
-                tag_position = tag["position"] - self.camera_position
-                z_pos = tag_position[2]
-                tags_with_z.append((z_pos, tag))
+                world_pos = tag['position']
+                tags_with_z.append((world_pos[2], tag))
 
             tags_sorted = sorted(tags_with_z, key=lambda x: x[0])
 
-            for z_pos, tag in tags_sorted:
-                glLoadIdentity()
-                tag_position = tag["position"] - self.camera_position
-                glTranslatef(*tag_position)
-                rotation = tag["rotation"]
-                glRotatef(rotation[2], 0, 0, 1)  # Rotate around global z-axis
-                glRotatef(rotation[1], 0, 1, 0)  # Rotate around global y-axis
-                glRotatef(rotation[0], 1, 0, 0)  # Rotate around global x-axis
-                glBindTexture(GL_TEXTURE_2D, tag["texture"])
-                # Render textured quad with size based on tag_size
-                size = (self.tag_size_outer) / 2
-                logging.debug(f"Tag size (outer/2): {size}")
+            for _, tag in tags_sorted:
+                glPushMatrix()
+                # Draw each tag in its local pose
+                tag_pos = tag['position']
+                glTranslatef(*tag_pos)
+                rot = tag['rotation']
+                glRotatef(rot[2], 0, 0, 1)
+                glRotatef(rot[1], 0, 1, 0)
+                glRotatef(rot[0], 1, 0, 0)
+                glBindTexture(GL_TEXTURE_2D, tag['texture'])
+                size = self.tag_size_outer / 2
                 glBegin(GL_QUADS)
                 glTexCoord2f(0, 0); glVertex3f(-size, -size, 0)
-                glTexCoord2f(1, 0); glVertex3f(size, -size, 0)
-                glTexCoord2f(1, 1); glVertex3f(size, size, 0)
-                glTexCoord2f(0, 1); glVertex3f(-size, size, 0)
+                glTexCoord2f(1, 0); glVertex3f( size, -size, 0)
+                glTexCoord2f(1, 1); glVertex3f( size,  size, 0)
+                glTexCoord2f(0, 1); glVertex3f(-size,  size, 0)
                 glEnd()
+                glPopMatrix()
 
             # Capture the rendered image
             width, height = self.display
@@ -492,7 +515,7 @@ class Simulation:
 
     
 if __name__ == '__main__':
-    sim = Simulation('sim_settings.json',movment_flag=False)
+    sim = Simulation('sim_settings.json',movment_flag=True)
     try:
         sim.run()
     except KeyboardInterrupt:
