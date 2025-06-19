@@ -195,7 +195,17 @@ This project welcomes contributions! The modular architecture makes it easy to:
 
 ## 📄 License
 
-Licensed under the terms in `docs/LICENSE`.
+AprilSLAM is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License** (CC BY-NC 4.0).
+
+**What this means:**
+- ✅ **Free for research, education, and personal projects**
+- ✅ You can share, modify, and distribute the code
+- ✅ Must provide attribution to the original authors
+- ❌ **Commercial use requires permission**
+
+For **commercial licensing** or questions about usage rights, please contact the project maintainer.
+
+See the full license terms in [`LICENSE`](LICENSE).
 
 ---
 
