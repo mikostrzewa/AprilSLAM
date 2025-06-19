@@ -5,4 +5,14 @@ failed_images.txt
 apriltag/
 .venv/
 __pycache__/
-error_data.csv
+
+# Ignore all data files but keep directory structure
+data/csv/*.csv
+data/logs/*.log
+data/logs/failed_images.txt
+data/calibration/*.npz
+
+# Keep directory structure with .gitkeep files
+!data/csv/.gitkeep
+!data/logs/.gitkeep
+!data/calibration/.gitkeep
