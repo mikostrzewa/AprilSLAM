@@ -25,10 +25,140 @@ AprilSLAM solves the fundamental robotics problem of **"Where am I and what does
 
 ### Prerequisites
 
-Make sure you have Python 3.8+ installed with the following packages:
+**System Requirements:**
+- Python 3.8 or higher
+- C++ compiler (for AprilTag library compilation)
+- CMake (for building AprilTag)
+- Ninja build system (recommended for faster builds)
+
+### Installation
+
+1. **Clone the repository:**
+```bash
+git clone <repository-url>
+cd AprilSLAM
+```
+
+2. **Build AprilTag library locally:**
+```bash
+# Navigate to lib directory and clone official repository
+cd lib/
+git clone https://github.com/AprilRobotics/apriltag.git
+cd apriltag
+
+# Build with Ninja (requires cmake and ninja-build)
+cmake -B build -GNinja
+cmake --build build
+
+# Install Python bindings
+cd python
+pip install -e .
+cd ../../..
+```
+
+3. **Install remaining Python dependencies:**
+```bash
+pip install -r requirements.txt
+```
+
+**✅ Note:** AprilTag is intentionally not included in `requirements.txt` since the local build method is more reliable.
+
+**⚠️ Fallback:** If the local build fails, you can try installing AprilTag via pip as a fallback:
+
+**On Ubuntu/Debian:**
+```bash
+sudo apt-get install cmake build-essential ninja-build
+```
+
+**On macOS:**
+```bash
+brew install cmake ninja
+```
+
+**On Windows:**
+- Install Visual Studio Build Tools
+- Install CMake
+- Then run: `pip install apriltag`
+
+4. **Verify installation:**
+```bash
+# Quick check
+python -c "import apriltag; print('AprilTag successfully installed!')"
+
+# Comprehensive verification (recommended)
+python scripts/verify_installation.py
+```
+
+### 🔧 Troubleshooting Installation
+
+If you encounter issues with the `apriltag` library:
+
+**Common Issues:**
+
+**1. Library Loading Errors (macOS/Linux):**
+```
+dlopen: libapriltag.dylib not found
+```
+**Solution:** The apriltag library may need to be rebuilt. Try:
+```bash
+pip uninstall apriltag
+pip install --no-cache-dir apriltag
+```
+
+**2. Windows Compilation Issues:**
+- **"Microsoft Visual C++ 14.0 is required"**: Install Visual Studio Build Tools
+- **"cmake not found"**: Install CMake from cmake.org or via package manager
+
+**3. General Compilation Errors:**
+- Ensure you have a working C++ compiler installed
+- Try updating pip: `pip install --upgrade pip setuptools wheel`
+
+**Alternative Solutions:**
+
+**Option 1: Build AprilTag Library Locally (Recommended)**
+For the most reliable AprilTag installation, build it directly from the [official University of Michigan repository](https://github.com/AprilRobotics/apriltag):
 
 ```bash
-pip install numpy opencv-python pygame PyOpenGL matplotlib pandas scikit-learn
+# Navigate to the lib directory
+cd lib/
+
+# Clone the official AprilTag repository
+git clone https://github.com/AprilRobotics/apriltag.git
+
+# Build with Ninja (recommended) or make
+cd apriltag
+cmake -B build -GNinja
+cmake --build build
+
+# Install Python bindings
+cd python
+pip install -e .
+```
+
+The simulation will automatically detect and use this locally built version.
+
+**Option 2: Manual AprilTag Build (Alternative Location)**
+```bash
+# If you prefer to build elsewhere, clone anywhere:
+git clone https://github.com/AprilRobotics/apriltag.git
+cd apriltag
+
+# Build with make instead of Ninja
+mkdir build && cd build
+cmake ..
+make -j4
+
+# Install Python bindings
+cd ../python
+pip install -e .
+```
+
+**Option 3: Alternative Installation Methods**
+```bash
+# Try different installation approaches:
+pip install apriltag --user
+# or
+conda install -c conda-forge apriltag
 ```
 
 ### 🎮 Run the Simulation (Recommended First Step)
@@ -172,18 +302,47 @@ AprilSLAM/
 
 ## 🔧 Dependencies
 
-- **OpenCV**: Computer vision and image processing
-- **NumPy**: Numerical computations
-- **Pygame + OpenGL**: 3D simulation rendering
-- **Matplotlib**: Data visualization and plotting
-- **Pandas**: Data analysis and CSV handling
+### Core Dependencies (Required)
+- **apriltag**: AprilTag visual fiducial system by [University of Michigan APRIL Robotics Laboratory](https://april.eecs.umich.edu/software/apriltag) - **ESSENTIAL** (built locally from source)
+- **opencv-python**: Computer vision and image processing
+- **numpy**: Numerical computations and matrix operations
+- **pygame**: Window management and input handling
+- **PyOpenGL**: 3D rendering and graphics
+
+### Analysis Dependencies
+- **matplotlib**: Data visualization and plotting
+- **pandas**: Data analysis and CSV handling
 - **scikit-learn**: Machine learning for clustering analysis
+- **networkx**: Graph visualization for SLAM graph
+- **termcolor**: Colored terminal output
+
+### Optional Dependencies
+- **seaborn**: Enhanced statistical plotting
+- **scipy**: Additional scientific computing tools
+
+**Installation:** Python dependencies are listed in `requirements.txt` for easy installation:
+```bash
+pip install -r requirements.txt
+```
+*Note: AprilTag is built separately from source as shown in the installation steps above.*
+
+## 🙏 Acknowledgments
+
+This project builds upon the excellent [AprilTag visual fiducial system](https://april.eecs.umich.edu/software/apriltag) developed by the **APRIL Robotics Laboratory** at the University of Michigan, led by Associate Professor Edwin Olson. 
+
+AprilTag is a robust and flexible visual fiducial system that enables precise 3D position, orientation, and identity detection. The [official AprilTag repository](https://github.com/AprilRobotics/apriltag) is maintained by AprilRobotics and licensed under BSD.
+
+**Key AprilTag Publications:**
+- *"AprilTag: A robust and flexible visual fiducial system"* (ICRA 2011)
+- *"AprilTag 2: Efficient and robust fiducial detection"* (IROS 2016)
+- *"Flexible Layouts for Fiducial Tags"* (under review)
 
 ## 📚 Learn More
 
 - **Technical Details**: See `docs/SLAM_ARCHITECTURE.md` for algorithm details
 - **Research Applications**: Perfect for robotics and computer vision research
 - **Educational Use**: Great for learning SLAM concepts hands-on
+- **AprilTag Documentation**: Visit the [official AprilTag website](https://april.eecs.umich.edu/software/apriltag)
 
 ## 🤝 Contributing
 

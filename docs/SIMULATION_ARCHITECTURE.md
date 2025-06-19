@@ -1,4 +1,4 @@
-# AprilSLAM Simulation Architecture 🏗️
+# AprilSLAM Simulation Architecture 
 
 This document provides a comprehensive overview of the AprilSLAM simulation system architecture, explaining how the modular components work together to create a complete SLAM testing environment.
 
