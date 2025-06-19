@@ -1,0 +1,367 @@
+2025-06-19 14:31:45,577 - __main__ - INFO - 📋 Using configuration: /Users/astra/Documents/AprilSLAM/config/sim_settings.json
+2025-06-19 14:31:45,577 - __main__ - INFO - 🎮 Manual movement: enabled
+2025-06-19 14:31:45,578 - __main__ - INFO - ✨ Using new modular simulation engine
+2025-06-19 14:31:45,578 - __main__ - INFO - 🔧 Initializing simulation components...
+2025-06-19 14:31:45,578 - root - INFO - 🚀 Initializing AprilSLAM Simulation Engine
+2025-06-19 14:31:45,578 - root - INFO - ✓ Loaded configuration from: /Users/astra/Documents/AprilSLAM/config/sim_settings.json
+2025-06-19 14:31:45,578 - root - INFO - ✓ Camera controller initialized
+2025-06-19 14:31:46,656 - root - INFO - ✓ Created OpenGL window: 1000x1000
+2025-06-19 14:31:46,658 - root - INFO - ✓ OpenGL projection matrix configured
+2025-06-19 14:31:46,668 - root - INFO - ✓ Loaded tag 0: tags/tag0.png
+2025-06-19 14:31:46,670 - root - INFO - ✓ Loaded tag 1: tags/tag1.png
+2025-06-19 14:31:46,672 - root - INFO - ✓ Loaded tag 2: tags/tag2.png
+2025-06-19 14:31:46,674 - root - INFO - ✓ Loaded tag 3: tags/tag3.png
+2025-06-19 14:31:46,676 - root - INFO - ✓ Loaded tag 4: tags/tag4.png
+2025-06-19 14:31:46,676 - root - INFO - ✓ Loaded 5 tag textures
+2025-06-19 14:31:46,676 - root - INFO - ✓ OpenGL renderer initialized
+2025-06-19 14:31:46,677 - root - INFO - ✓ Ground truth calculator initialized
+2025-06-19 14:31:46,677 - root - INFO - ✓ Output directory: /Users/astra/Documents/AprilSLAM/src/simulation/../../data/csv
+2025-06-19 14:31:46,677 - root - INFO - ✓ CSV files initialized with headers
+2025-06-19 14:31:46,678 - root - INFO - ✓ Data logger initialized
+2025-06-19 14:31:46,678 - root - INFO - Initializing SLAM
+2025-06-19 14:31:46,854 - root - INFO - ✓ SLAM system initialized
+2025-06-19 14:31:46,855 - root - INFO - ✅ Simulation engine initialized successfully
+2025-06-19 14:31:46,855 - __main__ - INFO - 🎯 Starting AprilSLAM simulation...
+2025-06-19 14:31:46,855 - root - INFO - 🎮 Starting simulation main loop
+2025-06-19 14:31:47,833 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:47,834 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:48,188 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:48,189 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:48,484 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:48,485 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:48,762 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:48,763 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:49,042 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:49,042 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:49,356 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:49,356 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:49,738 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:49,738 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:50,042 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:50,043 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:50,343 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:50,343 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:50,631 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:50,632 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:50,919 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:50,920 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:51,195 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:51,196 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:51,573 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:51,575 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:51,885 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:51,886 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:52,256 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:52,257 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:52,554 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:52,555 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:52,846 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:52,847 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:53,123 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:53,123 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:53,402 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:53,402 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:53,681 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:53,682 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:53,969 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:53,970 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:54,253 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:54,254 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:54,542 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:54,543 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:54,816 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:54,816 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:55,099 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:55,099 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:55,384 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:55,384 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:55,676 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:55,676 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:56,040 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:56,040 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:56,405 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:56,405 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:56,785 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:56,786 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:57,107 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:57,108 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:57,389 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:57,390 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:57,674 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:57,674 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:57,954 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:57,955 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:58,240 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:58,241 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:58,517 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:58,517 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:58,807 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:58,807 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:59,105 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:59,105 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:59,381 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:59,381 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:59,661 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:59,662 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:31:59,966 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:31:59,966 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:32:00,272 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.15841486166943
+2025-06-19 14:32:00,272 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.56495365339071
+2025-06-19 14:32:00,561 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 75.9511584586014
+2025-06-19 14:32:00,832 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.15841486166943
+2025-06-19 14:32:00,833 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.56495365339071
+2025-06-19 14:32:01,123 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.34146240389457
+2025-06-19 14:32:01,123 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47295093668058
+2025-06-19 14:32:01,412 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.36557587250269
+2025-06-19 14:32:01,412 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.60056798207341
+2025-06-19 14:32:01,704 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.03314966721607
+2025-06-19 14:32:01,705 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.58605854941063
+2025-06-19 14:32:01,990 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 75.90125209245777
+2025-06-19 14:32:01,991 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.59411709580333
+2025-06-19 14:32:02,272 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.28167456463312
+2025-06-19 14:32:02,273 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.6114661212733
+2025-06-19 14:32:02,566 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.453235070435
+2025-06-19 14:32:02,566 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.4756531771544
+2025-06-19 14:32:02,943 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 75.89679492516316
+2025-06-19 14:32:02,943 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.542988241449535
+2025-06-19 14:32:03,231 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 75.89126169338617
+2025-06-19 14:32:03,232 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.537231350176896
+2025-06-19 14:32:03,504 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.538782439333325
+2025-06-19 14:32:03,794 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.538782439333325
+2025-06-19 14:32:04,078 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.461558150439366
+2025-06-19 14:32:04,362 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.52428020006851
+2025-06-19 14:32:04,649 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.59494484332667
+2025-06-19 14:32:04,939 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.59494484332667
+2025-06-19 14:32:05,241 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.55572165688386
+2025-06-19 14:32:05,572 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.464316618106494
+2025-06-19 14:32:05,861 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.533448135180535
+2025-06-19 14:32:06,135 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.53610017134029
+2025-06-19 14:32:06,419 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.53610017134029
+2025-06-19 14:32:06,710 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.533448135180535
+2025-06-19 14:32:07,003 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.464316618106494
+2025-06-19 14:32:07,277 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.55572165688386
+2025-06-19 14:32:07,559 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.58565313058182
+2025-06-19 14:32:07,845 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.47544447314338
+2025-06-19 14:32:08,123 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.58565313058182
+2025-06-19 14:32:08,404 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.55572165688386
+2025-06-19 14:32:08,690 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.15919978438097
+2025-06-19 14:32:08,691 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.597448801975
+2025-06-19 14:32:08,973 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:08,974 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:09,264 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:09,265 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:09,559 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:09,559 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:09,847 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:09,847 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:10,152 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:10,152 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:10,447 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:10,448 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:10,734 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:10,734 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:11,020 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:11,020 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:11,308 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:11,309 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:11,594 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:11,595 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:11,882 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:11,882 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:12,164 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:12,165 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:12,467 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:12,468 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:12,763 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:12,763 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:13,055 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:13,055 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:13,336 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:13,337 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:13,625 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:13,625 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:13,916 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:13,917 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:14,212 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:14,212 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:14,510 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:14,511 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:14,799 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:14,800 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:15,102 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:15,102 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:15,400 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:15,400 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:15,687 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:15,688 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:15,982 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:15,982 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:16,282 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:16,282 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:16,578 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:16,579 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:16,872 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:16,873 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:17,165 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:17,166 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:17,458 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:17,459 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:17,745 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:17,746 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:18,035 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:18,036 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:18,373 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:18,374 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:18,678 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:18,678 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:18,976 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:18,977 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:19,271 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:19,271 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:19,563 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:19,563 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:19,849 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:19,850 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:20,142 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:20,142 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:20,434 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:20,434 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:20,718 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:20,719 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:21,001 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:21,001 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:21,286 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:21,287 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:21,567 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:21,568 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:21,858 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:21,858 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:22,143 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:22,144 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:22,434 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:22,434 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:22,728 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:22,728 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:23,018 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:23,018 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:23,309 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:23,310 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:23,599 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:23,600 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:23,899 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:23,900 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:24,200 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:24,200 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:24,489 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:24,490 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:24,779 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:24,780 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:25,066 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:25,067 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:25,366 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:25,367 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:25,653 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:25,654 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:25,942 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:25,943 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:26,234 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:26,235 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:26,535 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:26,536 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:26,838 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:26,839 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:27,130 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:27,131 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:27,394 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:27,395 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:27,715 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:27,715 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:28,002 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:28,002 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:28,290 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:28,290 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:28,580 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:28,581 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:28,874 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:28,875 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:29,167 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:29,167 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:29,458 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:29,459 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:29,752 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:29,752 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:30,042 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:30,043 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:30,337 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:30,337 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:30,627 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:30,628 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:30,915 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:30,916 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:31,254 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:31,254 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:31,546 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:31,547 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:31,805 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:31,806 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:32,120 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:32,120 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:32,415 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:32,415 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:32,683 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:32,684 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:32,998 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:32,999 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:33,284 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:33,285 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:33,554 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:33,554 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:33,816 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:33,817 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:34,082 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:34,082 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:34,344 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:34,344 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:34,614 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:34,614 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:34,874 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:34,874 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:35,137 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:35,138 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:35,397 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:35,398 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:35,750 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:35,751 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:35,995 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:35,996 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:36,333 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:36,334 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:36,636 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:36,636 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:36,900 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:36,901 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:37,156 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:37,156 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:37,419 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:37,420 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:37,682 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:37,682 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:37,979 - root - INFO - Tag ID 1 (reference: 0): World transform translation length = 76.13008383126994
+2025-06-19 14:32:37,980 - root - INFO - Tag ID 2 (reference: 0): World transform translation length = 45.62343209718027
+2025-06-19 14:32:38,214 - root - INFO - 🧹 Cleaning up simulation resources
+2025-06-19 14:32:38,214 - root - INFO - ✓ Closed main data file
+2025-06-19 14:32:38,214 - root - INFO - ✓ Closed error parameters file
+2025-06-19 14:32:38,214 - root - INFO - ✓ Closed covariance file
+2025-06-19 14:32:38,215 - root - INFO - ✓ Data logger closed. Runtime: 51.54s, Frames: 172, Avg FPS: 3.34
+2025-06-19 14:32:38,218 - root - INFO - ✓ Cleaned up OpenGL textures
+2025-06-19 14:32:38,316 - root - INFO - ✓ Cleaned up renderer
+2025-06-19 14:32:38,316 - root - INFO - ✅ Cleanup completed successfully
+2025-06-19 14:32:38,317 - root - INFO - 🧹 Cleaning up simulation resources
+2025-06-19 14:32:38,317 - root - INFO - ✓ Data logger closed. Runtime: 51.64s, Frames: 172, Avg FPS: 3.33
+2025-06-19 14:32:38,317 - root - INFO - ✓ Cleaned up OpenGL textures
+2025-06-19 14:32:38,317 - root - INFO - ✓ Cleaned up renderer
+2025-06-19 14:32:38,317 - root - INFO - ✅ Cleanup completed successfully
+2025-06-19 14:32:38,317 - __main__ - INFO - 🧹 Cleaning up...
+2025-06-19 14:32:38,318 - root - INFO - ✓ Cleaned up OpenGL textures
+2025-06-19 14:32:38,318 - root - INFO - ✓ Cleaned up renderer
+2025-06-19 14:32:38,318 - root - INFO - ✓ Data logger closed. Runtime: 51.64s, Frames: 172, Avg FPS: 3.33
