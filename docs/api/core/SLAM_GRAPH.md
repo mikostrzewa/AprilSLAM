@@ -25,14 +25,28 @@ The Node class represents a single AprilTag in the SLAM graph, storing its spati
 - **updated** (bool, optional): Flag indicating if the node has been recently updated. Default: True
 - **visible** (bool, optional): Flag indicating if the tag is currently visible. Default: False
 
-### Attributes
+### Attributes and Coordinate Frames
 
-- **local**: Camera-to-tag transformation matrix
-- **world**: World-to-tag transformation matrix  
-- **reference**: Reference tag ID for coordinate calculations
-- **weight**: Inverse confidence based on reference chain length
-- **updated**: Recent update status flag
-- **visible**: Current visibility status flag
+- **local** (numpy.ndarray): **Camera-to-Tag** transformation matrix `T_camera_to_tag`
+  - Transforms points from camera frame to tag frame
+  - Updated each time the tag is detected
+  - Origin: Camera optical center → Tag center
+  
+- **world** (numpy.ndarray): **World-to-Tag** transformation matrix `T_world_to_tag`
+  - Transforms points from world frame to tag frame  
+  - Fixed once calculated (unless world frame changes)
+  - Origin: World coordinate origin → Tag center
+  
+- **reference** (int): Reference tag ID used for world coordinate calculation
+  - Links this tag to the coordinate frame chain
+  - Lower values indicate closer to world origin
+  
+- **weight** (int): Reference chain length (distance from world origin)
+  - Inverse confidence measure: lower weight = higher confidence
+  - Weight of 1 = direct reference to world origin
+  
+- **updated** (bool): Flag indicating if node was recently updated
+- **visible** (bool): Flag indicating if tag is currently visible to camera
 
 ## Class: SLAMGraph
 
@@ -89,8 +103,14 @@ Central method for adding new tags or updating existing ones in the graph.
 
 #### Parameters
 - **tag_id** (int): ID of the detected tag
-- **T** (numpy.ndarray): Camera-to-tag transformation matrix
+- **T** (numpy.ndarray): **Camera-to-Tag** transformation matrix `T_camera_to_tag`
 - **visible_tags** (list): List of currently visible tag IDs
+
+#### Coordinate Frame Processing
+**Input**: `T_camera_to_tag` from TagDetector.get_pose()
+**Storage**: 
+- `node.local = T_camera_to_tag` (direct storage)
+- `node.world = T_world_to_tag` (calculated via reference chain)
 
 #### Algorithm Logic
 
@@ -110,12 +130,18 @@ Calculates world coordinates through reference chain transformations.
 
 #### Parameters
 - **reference** (int): Reference tag ID
-- **T** (numpy.ndarray): Camera-to-tag transformation
+- **T** (numpy.ndarray): **Camera-to-Tag** transformation `T_camera_to_tag`
 
 #### Returns
-- **world** (numpy.ndarray): World-to-tag transformation matrix
+- **world** (numpy.ndarray): **World-to-Tag** transformation matrix `T_world_to_tag`
 - **weight** (int): Updated weight (reference chain length + 1)
 - **new_reference** (int): Ultimate reference in the chain
+
+#### Coordinate Frame Calculation
+Traces through reference chain to compute world coordinates:
+```
+T_world_to_tag = T_world_to_ref @ T_ref_to_camera @ T_camera_to_tag
+```
 
 ### `get_world(self, reference, T)`
 
@@ -123,21 +149,62 @@ Computes world transformation using reference tag's local coordinates.
 
 #### Parameters
 - **reference** (int): Reference tag ID  
-- **T** (numpy.ndarray): Camera-to-tag transformation
+- **T** (numpy.ndarray): **Camera-to-Tag** transformation `T_camera_to_tag`
 
 #### Returns
-- **world_transform** (numpy.ndarray): World coordinate transformation
+- **world_transform** (numpy.ndarray): **World-to-Tag** transformation `T_world_to_tag`
 
-#### Formula
+#### Coordinate Frame Formula
 ```
-world_transform = reference.local @ T
+T_world_to_tag = T_camera_to_ref @ T_camera_to_tag
 ```
+Where `T_camera_to_ref = reference.local` (stored camera-to-reference transformation)
 
 ### `update_world(self)`
 
 Placeholder method for global graph optimization (TODO: Implementation needed).
 
 Currently prints "No world update" and does nothing.
+
+## Coordinate Frame Management
+
+### Reference Frame Hierarchy
+
+The SLAMGraph maintains a hierarchical coordinate system:
+
+1. **World Frame**: Established by the lowest-ID detected tag
+2. **Reference Frames**: Intermediate coordinate frames for tag chains
+3. **Tag Frames**: Individual tag coordinate systems
+4. **Camera Frame**: Moving reference frame (estimated by SLAM class)
+
+### Transformation Storage
+
+Each node stores two critical transformations:
+
+#### `node.local` - Camera-to-Tag Transformation
+- **Purpose**: Direct observation from camera to tag
+- **Update**: Refreshed every time tag is detected
+- **Usage**: `point_in_tag = node.local @ point_in_camera`
+
+#### `node.world` - World-to-Tag Transformation  
+- **Purpose**: Fixed position of tag in world coordinates
+- **Update**: Calculated once, then fixed (unless world frame changes)
+- **Usage**: `point_in_tag = node.world @ point_in_world`
+
+### Reference Chain Processing
+
+When a new tag is detected, world coordinates are calculated via reference chain:
+
+```
+Tag A (World Origin) ← Reference chain ← Camera ← New Tag B
+```
+
+**Mathematical relationship**:
+```
+T_world_to_tagB = T_world_to_camera @ T_camera_to_tagB
+```
+
+Where `T_world_to_camera` is derived from visible reference tags.
 
 ## Data Structure Management
 

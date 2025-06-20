@@ -84,7 +84,21 @@ Estimates pose for a detected tag and updates the SLAM graph.
 Calculates the current camera pose estimate based on visible tags using weighted averaging.
 
 #### Returns
-- **pose** (numpy.ndarray or None): 4x4 transformation matrix representing camera pose, or None if no valid pose can be calculated
+- **pose** (numpy.ndarray or None): 4x4 transformation matrix `T_world_to_camera`, or None if no valid pose can be calculated
+
+#### Coordinate Frame Information
+**CRITICAL**: Returns **World-to-Camera** transformation matrix.
+
+**Usage**: `point_in_camera_frame = T_world_to_camera @ point_in_world_frame`
+
+**Matrix Structure**:
+```
+T_world_to_camera = [[R11, R12, R13, tx],
+                     [R21, R22, R23, ty], 
+                     [R31, R32, R33, tz],
+                     [0,   0,   0,   1 ]]
+```
+Where `[tx, ty, tz]` is the camera position in world coordinates.
 
 #### Algorithm
 - Weighted average of poses from all visible tags
@@ -237,10 +251,39 @@ cv2.destroyAllWindows()
 - Tag poses are continuously refined as new observations become available
 - The coordinate frame is dynamically selected based on tag visibility and detection order
 
-### Coordinate Systems
-- **World Frame**: Defined by the lowest-ID visible tag
-- **Camera Frame**: Moving reference frame of the camera
-- **Tag Frames**: Local coordinate systems for each detected tag
+### Coordinate Frame Conventions
+
+#### World Coordinate Frame (SLAM Reference)
+- **Definition**: Established by the lowest-ID tag initially detected
+- **Origin**: Center of the reference tag
+- **Axes**: Inherits the tag's coordinate system (X-right, Y-up, Z-out)
+- **Usage**: All poses (camera and tags) expressed in this frame
+- **Dynamic**: May change if lower-ID tags are detected later
+
+#### Camera Coordinate Frame (Moving Frame)
+- **Origin**: Camera optical center
+- **Axes**: OpenCV convention (X-right, Y-down, Z-forward)
+- **Representation**: 4x4 transformation matrix in world frame
+- **Updates**: Continuously estimated via `my_pose()`
+
+#### Tag Coordinate Frames (Landmark Frames)
+- **Origin**: Physical center of each AprilTag
+- **Axes**: X-right, Y-up, Z-out (when viewing tag)
+- **Storage**: Each tag pose stored as world-to-tag transformation
+- **Consistency**: All tags referenced to the same world frame
+
+#### Transformation Chain
+```
+World Frame → Camera Frame → Tag Frame
+    ^               ^              ^
+    |               |              |
+  Fixed       slam.my_pose()  detector.get_pose()
+```
+
+**Key Relationships**:
+- `T_world_to_camera = slam.my_pose()`
+- `T_camera_to_tag = detector.get_pose()[3]`  
+- `T_world_to_tag = slam.graph.nodes[tag_id]['transformation']`
 
 ### Performance Considerations
 - Real-time operation depends on tag detection frequency and complexity

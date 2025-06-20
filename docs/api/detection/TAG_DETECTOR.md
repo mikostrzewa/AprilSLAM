@@ -91,12 +91,35 @@ Estimates the 3D pose of a detected AprilTag using PnP (Perspective-n-Point) alg
 - **tvec** (numpy.ndarray): Translation vector (3x1)
 - **T** (numpy.ndarray): 4x4 homogeneous transformation matrix
 
-#### Coordinate System
-The method assumes the tag's coordinate frame with:
-- Origin at the tag center
-- Z-axis pointing out of the tag plane
-- X-axis pointing right
-- Y-axis pointing up
+#### Coordinate Frames and Transformations
+
+**CRITICAL**: The returned transformation matrix represents **Camera-to-Tag** transformation.
+
+##### Tag Coordinate Frame (Target Frame)
+- **Origin**: Center of the AprilTag
+- **X-axis**: Points to the right when viewing the tag (→)
+- **Y-axis**: Points upward when viewing the tag (↑)  
+- **Z-axis**: Points out of the tag plane toward the camera (⊙)
+- **Convention**: Right-handed coordinate system
+
+##### Camera Coordinate Frame (Source Frame)
+- **Origin**: Camera optical center
+- **X-axis**: Points right in image plane (→)
+- **Y-axis**: Points down in image plane (↓)
+- **Z-axis**: Points forward (into the scene) (→)
+- **Convention**: OpenCV right-handed coordinate system
+
+##### Transformation Matrix T
+```
+T_camera_to_tag = [[R11, R12, R13, tx],
+                   [R21, R22, R23, ty], 
+                   [R31, R32, R33, tz],
+                   [0,   0,   0,   1 ]]
+```
+
+**Usage**: `point_in_tag_frame = T @ point_in_camera_frame`
+
+**To get Tag-to-Camera transformation**: `T_tag_to_camera = np.linalg.inv(T)`
 
 #### Example
 ```python
@@ -216,10 +239,34 @@ cv2.destroyAllWindows()
 
 ## Technical Notes
 
-### Coordinate Systems
-- **Image coordinates**: Origin at top-left, x-right, y-down
-- **Tag coordinates**: Origin at tag center, x-right, y-up, z-out
-- **Camera coordinates**: Origin at camera center, x-right, y-down, z-forward
+### Coordinate Frame Conventions
+
+#### Image Coordinate System (2D Pixel Space)
+- **Origin**: Top-left corner of image
+- **u-axis**: Horizontal, pointing right (→)
+- **v-axis**: Vertical, pointing down (↓)
+- **Units**: Pixels
+
+#### Camera Coordinate System (3D Physical Space)
+- **Origin**: Camera optical center (principal point projected to 3D)
+- **X-axis**: Right in image plane (→)
+- **Y-axis**: Down in image plane (↓)
+- **Z-axis**: Forward into scene (→)
+- **Units**: Meters (or whatever units tag_size is specified in)
+- **Convention**: OpenCV right-handed system
+
+#### Tag Coordinate System (3D Physical Space)
+- **Origin**: Physical center of AprilTag
+- **X-axis**: Right when viewing tag from front (→)
+- **Y-axis**: Up when viewing tag from front (↑)
+- **Z-axis**: Out of tag plane toward camera (⊙)
+- **Units**: Meters (same as camera frame)
+- **Convention**: Standard right-handed system
+
+#### World Coordinate System (SLAM Context)
+- **Definition**: Typically defined by first observed tag or manually set
+- **Usage**: All tag poses and camera trajectory expressed relative to this frame
+- **Transformation**: Camera-to-World = Tag-to-World @ Camera-to-Tag^(-1)
 
 ### Performance Considerations
 - The detector works on grayscale images for optimal performance

@@ -92,6 +92,21 @@ AprilSLAM System Architecture
 └─────────────────────────┘    └─────────────────────────┘
 ```
 
+## ⚠️ Critical: Coordinate Frame Conventions
+
+**Understanding coordinate frames is essential for working with AprilSLAM!** Each component uses specific coordinate conventions:
+
+- **TagDetector**: Returns **Camera-to-Tag** transformations `T_camera_to_tag`
+- **SLAM**: Estimates **World-to-Camera** poses `T_world_to_camera`  
+- **SLAMGraph**: Stores **World-to-Tag** positions `T_world_to_tag`
+
+**Coordinate System Standards**:
+- **Camera Frame**: OpenCV convention (X-right, Y-down, Z-forward)
+- **Tag Frame**: Standard convention (X-right, Y-up, Z-out)
+- **World Frame**: Defined by lowest-ID detected tag
+
+See individual class documentation for detailed coordinate frame information and transformation matrices.
+
 ## 🛠️ Development Guidelines
 
 ### Code Organization
@@ -99,6 +114,12 @@ AprilSLAM System Architecture
 - **Detection Classes**: Computer vision and tag detection functionality  
 - **Simulation Classes**: Virtual environment and testing infrastructure
 - **Utility Classes**: Supporting functionality like calibration and analysis
+
+### Design Principles
+- **Direct Access**: Simple operations use direct component access rather than wrapper methods
+- **Focused Responsibilities**: Each class has a clear, single responsibility
+- **Data vs Algorithms**: Clear separation between data structures (SLAMGraph) and algorithms (SLAM)
+- **Coordinate Frame Clarity**: All transformations explicitly document their source and target frames
 
 ### Documentation Standards
 - Each class has comprehensive API documentation
