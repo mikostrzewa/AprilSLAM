@@ -47,6 +47,7 @@ class TagDetector:
         rotation_matrix, _ = cv2.Rodrigues(rvec)
         transformation_matrix = np.eye(4)
         transformation_matrix[:3, :3] = rotation_matrix
+        # Convert tvec from 2D array (3x1) to 1D array (3,) for proper assignment
         transformation_matrix[:3, 3] = tvec.flatten()
         return transformation_matrix
     
