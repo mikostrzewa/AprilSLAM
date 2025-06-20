@@ -6,6 +6,12 @@ apriltag/
 .venv/
 __pycache__/
 
+# Draw.io temporary and backup files
+.$*
+*.bkp
+*.tmp
+~$*
+
 # Ignore all data files but keep directory structure
 data/csv/*.csv
 data/logs/*.log

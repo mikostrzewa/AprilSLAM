@@ -40,11 +40,13 @@ Located in: `src/core/slam_graph.py`
 
 ### Purpose
 
-The SLAMGraph class handles the complete graph structure for SLAM operations including:
+The SLAMGraph class handles the graph data structure for SLAM operations including:
 - Managing spatial relationships between tags
-- Coordinate frame transformations
-- Pose estimation from multiple tag observations
+- Coordinate frame transformations and reference management
+- Node storage and graph structure maintenance
 - Dynamic world coordinate frame selection
+
+**Note**: Pose estimation and analysis logic has been moved to the SLAM class for better separation of concerns.
 
 ### Dependencies
 
@@ -137,41 +139,9 @@ Placeholder method for global graph optimization (TODO: Implementation needed).
 
 Currently prints "No world update" and does nothing.
 
-## Pose Estimation
+## Data Structure Management
 
-### `my_pose(self)`
-
-Calculates the current camera pose using weighted average from all visible tags.
-
-#### Returns
-- **pose** (numpy.ndarray or None): 4x4 camera pose matrix, or None if no valid observations
-
-#### Algorithm
-
-1. **Visibility Update**: Marks all nodes as not visible
-2. **Visible Tags Processing**: For each visible tag:
-   - Marks node as visible
-   - Calculates camera pose: `world @ local`
-   - Applies inverse weight based on reference chain length
-3. **Weighted Average**: Computes weighted average of all valid poses
-4. **Update Storage**: Stores result in `estimated_pose`
-
-#### Weighting Scheme
-- Weight = 1 / node.weight
-- Lower weights for longer reference chains
-- Ensures closer, more reliable references have higher influence
-
-### `average_distance_to_nodes(self)`
-
-Calculates average Euclidean distance from camera to all detected tags.
-
-#### Returns
-- **distance** (float): Average distance to all nodes, or 0 if no nodes exist
-
-#### Algorithm
-- Extracts translation component from each node's local transformation
-- Computes Euclidean norm of translation vectors
-- Returns arithmetic mean of all distances
+The SLAMGraph focuses on maintaining the graph structure and coordinate relationships. Pose estimation and analysis algorithms are handled by the SLAM class.
 
 ## Graph Access Methods
 

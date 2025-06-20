@@ -75,49 +75,7 @@ class SLAMGraph:
         # TODO: Implement the update_world method
         pass
     
-    def my_pose(self):
-        """Calculate the current pose estimate from visible tags"""
-        if not self.visible_tags:
-            return None
-        
-        T_sum = np.zeros((4, 4))
-        count = 0
 
-        for node in self.graph.values():
-            node.visible = False
-        
-        for tag_id in self.visible_tags:
-            if tag_id in self.graph:
-                node = self.graph[tag_id]
-                node.visible = True
-                T = np.matmul(node.world, node.local)
-                if T is not None:
-                    T_sum += T / node.weight
-                    count += 1 / node.weight
-        
-        if count == 0:
-            return None
-        
-        T_avg = T_sum / count
-        self.estimated_pose = T_avg 
-        return T_avg
-    
-    def average_distance_to_nodes(self):
-        """Calculate average distance to all nodes"""
-        total_distance = 0
-        node_count = 0
-
-        for node in self.graph.values():
-            translation = node.local[:3, 3]
-            distance = np.linalg.norm(translation)
-            total_distance += distance
-            node_count += 1
-
-        if node_count == 0:
-            return 0
-
-        average_distance = total_distance / node_count
-        return average_distance
     
     def get_nodes(self):
         """Get all nodes in the graph"""

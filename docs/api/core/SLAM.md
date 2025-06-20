@@ -79,23 +79,9 @@ Estimates pose for a detected tag and updates the SLAM graph.
 - Adds or updates node in SLAM graph if pose estimation succeeds
 - Updates spatial relationships between tags
 
-### `draw(self, rvec, tvec, corners, image, tag_id)`
-
-Draws detection visualization on the input image.
-
-#### Parameters
-- **rvec** (numpy.ndarray): Rotation vector
-- **tvec** (numpy.ndarray): Translation vector
-- **corners** (numpy.ndarray): Tag corner coordinates
-- **image** (numpy.ndarray): Image to draw on
-- **tag_id** (int): Tag ID number
-
-#### Returns
-- **image** (numpy.ndarray): Image with visualization overlays
-
 ### `my_pose(self)`
 
-Calculates the current camera pose estimate based on visible tags.
+Calculates the current camera pose estimate based on visible tags using weighted averaging.
 
 #### Returns
 - **pose** (numpy.ndarray or None): 4x4 transformation matrix representing camera pose, or None if no valid pose can be calculated
@@ -103,14 +89,42 @@ Calculates the current camera pose estimate based on visible tags.
 #### Algorithm
 - Weighted average of poses from all visible tags
 - Uses inverse weights based on reference chain length
+- Updates node visibility status
 - Returns None if no visible tags are available
 
 ### `average_distance_to_nodes(self)`
 
-Calculates the average distance from camera to all detected tags.
+Calculates the average distance from camera to all detected tags for analysis purposes.
 
 #### Returns
 - **distance** (float): Average Euclidean distance to all nodes in the graph
+
+## Direct Component Access
+
+For methods that simply pass through to underlying components, direct access is recommended:
+
+### Tag Detection and Visualization
+```python
+# For drawing detection visualization
+frame = slam.detector.draw(rvec, tvec, corners, frame, tag_id)
+```
+
+### Pose Estimation and Analysis
+
+```python
+# For getting current pose estimate (SLAM algorithm logic)
+current_pose = slam.my_pose()
+
+# For calculating average distance to nodes (analysis logic)
+avg_distance = slam.average_distance_to_nodes()
+```
+
+### Graph Data Access
+```python
+# For accessing graph structure (data only)
+nodes = slam.graph.get_nodes()
+coordinate_id = slam.graph.get_coordinate_id()
+```
 
 ### Properties
 
@@ -196,7 +210,7 @@ while True:
         if success:
             # Draw visualization
             corners = np.array(detection['lb-rb-rt-lt'], dtype=np.float32)
-            frame = slam.draw(rvec, tvec, corners, frame, detection['id'])
+            frame = slam.detector.draw(rvec, tvec, corners, frame, detection['id'])
     
     # Get current pose estimate
     current_pose = slam.my_pose()

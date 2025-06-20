@@ -31,18 +31,54 @@ class SLAM:
             self.graph.add_or_update_node(detection['id'], T, self.visible_tags)
         return retval, rvec, tvec
     
-    def draw(self, rvec, tvec, corners, image, tag_id):
-        """Draw detection visualization on image"""
-        return self.detector.draw(rvec, tvec, corners, image, tag_id)
+
     
     def my_pose(self):
-        """Get the current pose estimate"""
-        return self.graph.my_pose()
+        """Calculate the current pose estimate from visible tags"""
+        if not self.visible_tags:
+            return None
+        
+        T_sum = np.zeros((4, 4))
+        count = 0
 
-    def average_distance_to_nodes(self):
-        """Get average distance to all nodes"""
-        return self.graph.average_distance_to_nodes()
+        # Update node visibility
+        for node in self.graph.get_nodes().values():
+            node.visible = False
+        
+        for tag_id in self.visible_tags:
+            if tag_id in self.graph.get_nodes():
+                node = self.graph.get_nodes()[tag_id]
+                node.visible = True
+                T = np.matmul(node.world, node.local)
+                if T is not None:
+                    T_sum += T / node.weight
+                    count += 1 / node.weight
+        
+        if count == 0:
+            return None
+        
+        T_avg = T_sum / count
+        # Update estimated pose in graph for reference
+        self.graph.estimated_pose = T_avg 
+        return T_avg
     
+    def average_distance_to_nodes(self):
+        """Calculate average distance to all nodes"""
+        total_distance = 0
+        node_count = 0
+
+        for node in self.graph.get_nodes().values():
+            translation = node.local[:3, 3]
+            distance = np.linalg.norm(translation)
+            total_distance += distance
+            node_count += 1
+
+        if node_count == 0:
+            return 0
+
+        average_distance = total_distance / node_count
+        return average_distance
+
     @property
     def coordinate_id(self):
         """Get the current coordinate frame ID"""

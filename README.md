@@ -181,6 +181,7 @@ This will launch a 3D simulation where you can:
 - `A/D`: Rotate left/right
 - `Q/E`: Roll camera
 - `R/F`: Pitch up/down
+- `ESC`: Quit simulation
 
 ### 📷 Real Camera Detection
 
@@ -278,6 +279,27 @@ src/
 - **AprilTag Detection**: High-precision marker detection
 - **3D Simulation**: OpenGL-based realistic environment
 - **Error Analysis**: Comprehensive performance metrics
+
+### Design Principles
+
+**Direct Component Access**: AprilSLAM follows a direct access pattern for better maintainability:
+
+```python
+# ✅ Preferred: Direct access for simple operations
+frame = slam.detector.draw(rvec, tvec, corners, frame, tag_id)
+pose = slam.graph.my_pose()
+distance = slam.graph.average_distance_to_nodes()
+
+# ✅ Wrapper methods only when they add value (simplify complex calls)
+slam.vis_slam(ground_truth=gt_pose)  # Handles complex parameter preparation
+slam.slam_graph()  # Abstracts graph data preparation
+```
+
+This approach:
+- **Reduces complexity** by avoiding unnecessary wrapper layers
+- **Improves maintainability** by eliminating duplicate method signatures
+- **Keeps interfaces clean** while maintaining component encapsulation
+- **Reserves wrappers** for cases where they genuinely simplify usage
 
 ## 📈 Performance Features
 

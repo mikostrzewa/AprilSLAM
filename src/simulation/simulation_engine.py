@@ -216,7 +216,6 @@ class SimulationEngine:
         Args:
             frame (np.ndarray): Current camera frame
         """
-        # Detect AprilTags
         detections = self.slam.detect(frame)
         
         # Process detections and update SLAM graph
@@ -224,7 +223,7 @@ class SimulationEngine:
             retval, rvec, tvec = self.slam.get_pose(detection)
             if retval:
                 corners = np.array(detection['lb-rb-rt-lt'], dtype=np.float32)
-                frame = self.slam.draw(rvec, tvec, corners, frame, detection['id'])
+                frame = self.slam.detector.draw(rvec, tvec, corners, frame, detection['id'])
         
         # Display processed frame
         cv2.imshow('AprilTag Detection', frame)
@@ -451,12 +450,13 @@ class SimulationEngine:
             print(colored("\n🎮 Controls:", 'white', attrs=['bold']))
             print(colored("  Arrow Keys: Move X/Y  |  W/S: Move Z", 'white'))
             print(colored("  A/D: Yaw  |  Q/E: Roll  |  R/F: Pitch", 'white'))
+            print(colored("  ESC: Quit Simulation", 'yellow'))
     
     def _update_display(self) -> None:
         """Update display and handle window events."""
         # pygame display is updated in renderer.render_frame()
         # Handle OpenCV window
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if cv2.waitKey(1) & 0xFF == 27:  # ESC key
             self.running = False
     
     def _cleanup(self) -> None:
