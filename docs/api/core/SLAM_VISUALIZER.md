@@ -143,11 +143,11 @@ Creates a 2D network graph visualization showing the connectivity structure betw
 Creates an error analysis visualization comparing estimated positions with ground truth data.
 
 #### Coordinate Frame Analysis
-**Error Calculations**: Performed in **World Coordinates** for consistency.
+**Error Calculations**: Compare **distance magnitudes** between estimated and ground truth positions.
 
-- **World Error**: `||estimated_world_pos - true_world_pos||`
-- **Local Error**: `||estimated_camera_pos - true_camera_pos||` (both in world frame)
-- **Reference**: All positions converted to world coordinates before error calculation
+- **World Error**: `|||estimated_world_pos|| - ||true_world_pos|||` - Difference in world position magnitudes
+- **Local Error**: `|||||estimated_local_pos|| - ||true_local_pos|||` - Difference in camera-to-tag distance magnitudes
+- **Reference**: Compares norms (distances from origin) rather than position vectors directly
 
 #### Parameters
 
@@ -166,9 +166,9 @@ Creates an error analysis visualization comparing estimated positions with groun
 
 #### Error Metrics
 
-- **World Error**: Difference between estimated and true world positions
-- **Local Error**: Difference between estimated and true camera-relative positions
-- **Euclidean Distance**: Uses L2 norm for error calculation
+- **World Error**: Absolute difference between estimated and true distance magnitudes from world origin
+- **Local Error**: Absolute difference between estimated and true camera-to-tag distance magnitudes  
+- **Magnitude Comparison**: Uses L2 norm of position vectors, then compares the norms
 
 #### Algorithm
 
