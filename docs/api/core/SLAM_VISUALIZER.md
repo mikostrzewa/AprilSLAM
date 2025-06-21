@@ -59,11 +59,19 @@ self.ax_err = self.err_graph.add_subplot(111)
 
 Creates a 3D scatter plot visualization of the SLAM state showing tag positions, camera pose, and optional ground truth.
 
+#### Coordinate Frame
+**CRITICAL**: All visualized positions are displayed in **World Coordinates**.
+
+- **Tag Positions**: Extracted from `node.world` transformations (World-to-Tag)
+- **Camera Pose**: Estimated position in world frame from `estimated_pose`
+- **Ground Truth**: Reference camera position in world frame (if provided)
+- **Axes**: X-right, Y-up, Z-out (following world coordinate convention)
+
 #### Parameters
 
 - **graph** (dict): Dictionary of Node objects from SLAMGraph
-- **estimated_pose** (numpy.ndarray): 4x4 camera pose transformation matrix
-- **ground_truth** (numpy.ndarray, optional): Ground truth camera pose for comparison
+- **estimated_pose** (numpy.ndarray): 4x4 **World-to-Camera** transformation matrix
+- **ground_truth** (numpy.ndarray, optional): Ground truth **World-to-Camera** pose for comparison
 
 #### Visualization Elements
 
@@ -100,6 +108,9 @@ visualizer.vis_slam(slam_graph.get_nodes(),
 
 Creates a 2D network graph visualization showing the connectivity structure between tags and their reference relationships.
 
+#### Coordinate Frame Context
+**Note**: This is a **topological graph** showing reference relationships, not spatial positions. The layout is algorithmic (circular) and does not represent physical world coordinates.
+
 #### Parameters
 
 - **graph** (dict): Dictionary of Node objects from SLAMGraph
@@ -131,10 +142,17 @@ Creates a 2D network graph visualization showing the connectivity structure betw
 
 Creates an error analysis visualization comparing estimated positions with ground truth data.
 
+#### Coordinate Frame Analysis
+**Error Calculations**: Performed in **World Coordinates** for consistency.
+
+- **World Error**: `||estimated_world_pos - true_world_pos||`
+- **Local Error**: `||estimated_camera_pos - true_camera_pos||` (both in world frame)
+- **Reference**: All positions converted to world coordinates before error calculation
+
 #### Parameters
 
-- **graph** (dict): Dictionary of estimated Node objects
-- **ground_truth_graph** (dict): Dictionary containing ground truth position data
+- **graph** (dict): Dictionary of estimated Node objects (with world coordinates)
+- **ground_truth_graph** (dict): Dictionary containing ground truth position data (in world coordinates)
 
 #### Visualization Elements
 
