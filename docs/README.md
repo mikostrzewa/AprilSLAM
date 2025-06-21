@@ -30,6 +30,7 @@ Detailed class and module documentation for developers.
 - [`SIMULATION_ENGINE.md`](api/simulation/SIMULATION_ENGINE.md) - Core simulation components
 - [`CAMERA_CONTROLLER.md`](api/simulation/CAMERA_CONTROLLER.md) - Virtual camera management
 - [`RENDERER.md`](api/simulation/RENDERER.md) - OpenGL rendering system
+- [`CONFIG_MANAGER.md`](api/simulation/CONFIG_MANAGER.md) - Configuration management and validation
 
 #### Calibration Module
 - [`CALIBRATION.md`](api/calibration/CALIBRATION.md) - Camera calibration utilities
